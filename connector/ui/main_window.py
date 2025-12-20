@@ -79,12 +79,6 @@ class MainWindow(QMainWindow):
         
         self._setup_ui()
         self._setup_timers()
-        
-        # Set MT5 client reference for API server
-        set_mt5_client(self.mt5_client)
-        
-        self._setup_ui()
-        self._setup_timers()
     
     def _setup_ui(self):
         """Setup the main UI"""
