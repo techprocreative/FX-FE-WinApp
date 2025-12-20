@@ -240,7 +240,49 @@ class ModelSecurity:
             models.append(file.stem)
         logger.debug(f"Found {len(models)} .nexmodel files in {self.models_dir}: {models}")
         return models
-    
+
+    def list_models_with_metadata(self) -> list:
+        """List all models with their metadata for display
+
+        Returns:
+            List of dicts with keys: model_id, name, symbol, accuracy, created_at
+        """
+        models = []
+        for file in self.models_dir.glob("*.nexmodel"):
+            model_id = file.stem
+            try:
+                # Load the secured model to get metadata
+                secured = self.load_secured_model(model_id)
+                if secured:
+                    metadata = secured.metadata
+
+                    # Extract user-friendly info
+                    model_info = {
+                        'model_id': model_id,
+                        'name': metadata.get('name', model_id[:8]),  # Fallback to short UUID
+                        'symbol': metadata.get('symbol', 'Unknown'),
+                        'accuracy': metadata.get('accuracy', 0.0),
+                        'created_at': metadata.get('created_at', 'Unknown'),
+                        'file_size': file.stat().st_size if file.exists() else 0
+                    }
+                    models.append(model_info)
+            except Exception as e:
+                logger.warning(f"Failed to load metadata for {model_id}: {e}")
+                # Still add model with basic info
+                models.append({
+                    'model_id': model_id,
+                    'name': model_id[:8] + '...',
+                    'symbol': 'Unknown',
+                    'accuracy': 0.0,
+                    'created_at': 'Unknown',
+                    'file_size': file.stat().st_size if file.exists() else 0
+                })
+
+        # Sort by name
+        models.sort(key=lambda x: x['name'])
+        logger.debug(f"Found {len(models)} models with metadata")
+        return models
+
     def delete_model(self, model_id: str) -> bool:
         """Delete a saved model"""
         file_path = self.models_dir / f"{model_id}.nexmodel"

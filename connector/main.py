@@ -79,16 +79,30 @@ async def main():
     """Main application entry point"""
     try:
         logger.info("Initializing application...")
-        
+
         # Set global exception hook
         sys.excepthook = exception_hook
-        
+
+        # ============================================
+        # HIGH-DPI SCALING CONFIGURATION
+        # ============================================
+        # Enable high-DPI scaling BEFORE creating QApplication
+        # This ensures proper scaling on 4K, retina, and high-DPI displays
+        os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+        os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+        os.environ["QT_SCALE_FACTOR_ROUNDING_POLICY"] = "PassThrough"
+
         # Create QApplication
         logger.info("Creating QApplication...")
         app = QApplication(sys.argv)
         app.setApplicationName("NexusTrade")
-        # Note: AA_EnableHighDpiScaling is deprecated in PyQt6 - enabled by default
-        logger.info("✓ QApplication created")
+
+        # Set high-DPI pixmap policy for crisp icons and images
+        app.setHighDpiScaleFactorRoundingPolicy(
+            Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+        )
+
+        logger.info("✓ QApplication created with High-DPI support")
         
         # Load configuration
         logger.info("Loading configuration...")

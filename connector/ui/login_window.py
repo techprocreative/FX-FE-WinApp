@@ -30,6 +30,9 @@ class LoginWindow(QWidget):
         self.setWindowTitle("NexusTrade - Login")
         self.setFixedSize(DT.LOGIN_WIDTH, DT.LOGIN_HEIGHT)
 
+        # Center window on screen
+        self._center_on_screen()
+
         # Apply window background gradient
         self._apply_window_gradient()
 
@@ -177,6 +180,17 @@ class LoginWindow(QWidget):
         layout.addWidget(info)
 
         layout.addStretch()
+
+    def _center_on_screen(self):
+        """Center the window on the primary screen"""
+        from PyQt6.QtWidgets import QApplication
+        screen = QApplication.primaryScreen()
+        if screen:
+            screen_geometry = screen.availableGeometry()
+            window_geometry = self.frameGeometry()
+            center_point = screen_geometry.center()
+            window_geometry.moveCenter(center_point)
+            self.move(window_geometry.topLeft())
 
     def _apply_window_gradient(self):
         """Apply gradient background to window"""

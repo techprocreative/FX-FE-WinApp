@@ -89,10 +89,14 @@ class AutoTrader:
         
         # Statistics per symbol
         self.stats: Dict[str, TradeStats] = {}
-        
+
+        # Track active positions for close detection
+        self._active_positions: Dict[int, Dict[str, Any]] = {}  # ticket -> position_info
+
         # Callbacks for UI updates
         self.on_signal_callback = None
         self.on_trade_callback = None
+        self.on_close_callback = None  # NEW: Called when position closes
         self.on_error_callback = None
     
     def load_model(
@@ -388,62 +392,127 @@ class AutoTrader:
         
         if ticket:
             logger.info(f"Trade executed: {signal.value} {volume} {symbol} @ ticket {ticket}")
-            
+
+            # Track position for close detection
+            self._active_positions[ticket] = {
+                'symbol': symbol,
+                'signal': signal.value,
+                'volume': volume,
+                'open_time': datetime.now(),
+                'open_price': tick[0]['close'] if tick else 0
+            }
+
             # Update stats
             self.stats[symbol].total_trades += 1
-            
+
             # Callback
             if self.on_trade_callback:
                 self.on_trade_callback(symbol, signal, ticket, volume)
-        
+
         return ticket
-    
+
+    def _check_closed_positions(self):
+        """
+        Check for positions that have closed and trigger callbacks.
+        Updates statistics with P&L.
+        """
+        if not self._active_positions:
+            return
+
+        # Get current open positions from MT5
+        current_positions = self.mt5.get_positions()
+        current_tickets = {pos.ticket for pos in current_positions}
+
+        # Find closed positions
+        for ticket, pos_info in list(self._active_positions.items()):
+            if ticket not in current_tickets:
+                # Position has closed
+                try:
+                    symbol = pos_info['symbol']
+                    open_time = pos_info['open_time']
+
+                    # Query trade history to get P&L
+                    from_date = open_time - timedelta(minutes=1)
+                    to_date = datetime.now()
+                    history = self.mt5.get_history(from_date, to_date)
+
+                    # Find closing trade for this ticket
+                    profit = 0.0
+                    for trade in history:
+                        if trade.ticket == ticket:
+                            profit = trade.profit
+                            logger.info(f"Found closed position {ticket}: profit=${profit:.2f}")
+                            break
+
+                    # Update stats
+                    if symbol in self.stats:
+                        self.stats[symbol].total_profit += profit
+                        if profit > 0:
+                            self.stats[symbol].winning_trades += 1
+                        elif profit < 0:
+                            self.stats[symbol].losing_trades += 1
+
+                    # Trigger callback with P&L
+                    if self.on_close_callback:
+                        self.on_close_callback(ticket, profit)
+
+                    logger.info(f"Position closed: ticket={ticket}, symbol={symbol}, profit=${profit:.2f}")
+
+                except Exception as e:
+                    logger.error(f"Error processing closed position {ticket}: {e}")
+
+                # Remove from active tracking
+                del self._active_positions[ticket]
+
     async def run_loop(self, interval_seconds: int = 60):
         """
         Main trading loop.
         Runs predictions and executes signals at regular intervals.
         """
         logger.info(f"Auto trading loop started (interval: {interval_seconds}s)")
-        
+
         while self.running:
             if self.paused:
                 await asyncio.sleep(1)
                 continue
-            
+
             try:
                 # Check MT5 connection
                 if not self.mt5.is_connected:
                     logger.warning("MT5 not connected, skipping iteration")
                     await asyncio.sleep(interval_seconds)
                     continue
-                
+
+                # Check for closed positions
+                self._check_closed_positions()
+
                 # Process each active model
                 for symbol, model_info in self.models.items():
                     if not self.running:
                         break
-                    
+
                     # Get prediction
                     signal, confidence = self.predict(symbol)
-                    
+
                     # Notify UI
                     if self.on_signal_callback:
                         self.on_signal_callback(symbol, signal, confidence)
-                    
+
                     # Execute if appropriate
                     if signal != Signal.HOLD:
                         self.execute_signal(symbol, signal, confidence)
-                    
+
                     # Small delay between symbols
                     await asyncio.sleep(0.5)
-                
+
             except Exception as e:
                 logger.exception(f"Error in trading loop: {e}")
                 if self.on_error_callback:
                     self.on_error_callback(str(e))
-            
+
             # Wait for next iteration
             await asyncio.sleep(interval_seconds)
-        
+
         logger.info("Auto trading loop stopped")
     
     def start(self, interval_seconds: int = 60):

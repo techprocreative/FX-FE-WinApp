@@ -3,9 +3,51 @@ NexusTrade Design System
 Centralized design tokens for consistent UI across all windows
 """
 
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtGui import QScreen
+
 
 class DesignTokens:
     """Design tokens - single source of truth for all UI styling"""
+
+    # ============================================
+    # SCREEN-AWARE DIMENSIONS
+    # ============================================
+
+    @staticmethod
+    def get_screen_size():
+        """Get primary screen size"""
+        app = QApplication.instance()
+        if app:
+            screen = app.primaryScreen()
+            if screen:
+                geometry = screen.availableGeometry()
+                return geometry.width(), geometry.height()
+        # Fallback for common HD resolution
+        return 1920, 1080
+
+    @classmethod
+    def get_responsive_window_size(cls):
+        """Calculate responsive window size based on screen"""
+        screen_w, screen_h = cls.get_screen_size()
+
+        # Use 85% of screen size, but with sensible min/max bounds
+        target_w = int(screen_w * 0.85)
+        target_h = int(screen_h * 0.85)
+
+        # Minimum sizes (for very small screens)
+        min_w = 1200
+        min_h = 700
+
+        # Maximum sizes (for very large screens like 4K)
+        max_w = 1920
+        max_h = 1200
+
+        # Clamp values
+        width = max(min_w, min(target_w, max_w))
+        height = max(min_h, min(target_h, max_h))
+
+        return width, height
 
     # ============================================
     # COLOR PALETTE
@@ -116,11 +158,15 @@ class DesignTokens:
     SIDEBAR_LOGO_HEIGHT = 100
     NAV_BUTTON_HEIGHT = 52
 
-    # Windows
+    # Windows - Responsive sizing (use get_responsive_window_size() for actual values)
+    # These are kept for backward compatibility but should use dynamic sizing
     LOGIN_WIDTH = 600
     LOGIN_HEIGHT = 680
-    MAIN_MIN_WIDTH = 1400
-    MAIN_MIN_HEIGHT = 900
+
+    # Main window sizes - will be calculated dynamically
+    # Minimum sizes are screen-percentage based (see get_responsive_window_size)
+    MAIN_MIN_WIDTH = 1200   # Absolute minimum
+    MAIN_MIN_HEIGHT = 700   # Absolute minimum
 
     # Components
     BUTTON_HEIGHT_SM = 36
