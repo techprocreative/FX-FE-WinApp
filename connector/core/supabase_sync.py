@@ -55,9 +55,15 @@ class SupabaseModelSync:
                 logger.warning(f"No storage path for model {model_id}")
                 return None
             
-            # Local path
-            local_path = self.local_models_dir / f"{model_id}.enc"
-            
+            # Local path - use .nexmodel extension to match ModelSecurity format
+            local_path = self.local_models_dir / f"{model_id}.nexmodel"
+
+            # Check for legacy .enc file and migrate if exists
+            legacy_path = self.local_models_dir / f"{model_id}.enc"
+            if legacy_path.exists() and not local_path.exists():
+                logger.info(f"Migrating legacy .enc file to .nexmodel for {model_id}")
+                legacy_path.rename(local_path)
+
             # Skip if already exists
             if local_path.exists():
                 logger.info(f"Model {model_id} already exists locally")
@@ -90,8 +96,8 @@ class SupabaseModelSync:
                 model_id = str(uuid.uuid4())
                 metadata['id'] = model_id
             
-            # Storage path: {user_id}/{model_id}.enc
-            storage_path = f"{self.user_id}/{model_id}.enc"
+            # Storage path: {user_id}/{model_id}.nexmodel (standardized extension)
+            storage_path = f"{self.user_id}/{model_id}.nexmodel"
             
             # Upload file to Storage
             logger.info(f"Uploading model to {storage_path}")

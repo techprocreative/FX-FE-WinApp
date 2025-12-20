@@ -24,6 +24,7 @@ from core.config import Config
 from core.mt5_client import MT5Client
 from api.server import set_mt5_client
 from ui.strategy_builder import StrategyBuilderTab
+from ui.design_system import DesignTokens as DT, StyleSheets
 from loguru import logger
 
 # Type hints only (no import at runtime)
@@ -120,87 +121,80 @@ class MainWindow(QMainWindow):
 
     
     def _setup_ui(self):
-        """Setup the main UI"""
+        """Setup the main UI with design system"""
         self.setWindowTitle("NexusTrade - Forex Trading Platform")
-        self.setMinimumSize(1400, 900)
-        
+        self.setMinimumSize(DT.MAIN_MIN_WIDTH, DT.MAIN_MIN_HEIGHT)
+
         # Central widget
         central = QWidget()
         self.setCentralWidget(central)
-        
+
         # Main layout
         main_layout = QHBoxLayout(central)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
-        
+
         # Sidebar
         sidebar = self._create_sidebar()
         main_layout.addWidget(sidebar)
-        
+
         # Content area
         self.content_stack = QStackedWidget()
-        self.content_stack.setStyleSheet("background-color: #1a1a2e;")
         main_layout.addWidget(self.content_stack, 1)
-        
+
         # Add pages
         self._create_pages()
-        
+
         # Status bar
         self._create_status_bar()
-        
-        # Apply styles
+
+        # Apply global styles
         self._apply_styles()
     
     def _create_sidebar(self) -> QFrame:
-        """Create the sidebar navigation - Modern glassmorphism"""
+        """Create the sidebar navigation with design system"""
         sidebar = QFrame()
-        sidebar.setFixedWidth(240)
-        sidebar.setStyleSheet("""
-            QFrame {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:0, y2:1,
-                    stop:0 rgba(15, 23, 42, 0.95), stop:1 rgba(30, 41, 59, 0.9)
-                );
-                border-right: 1px solid rgba(6, 182, 212, 0.15);
-            }
+        sidebar.setFixedWidth(DT.SIDEBAR_WIDTH)
+        sidebar.setStyleSheet(f"""
+            QFrame {{
+                background: {StyleSheets.gradient_sidebar()};
+                border-right: 1px solid {DT.BORDER_SUBTLE};
+            }}
         """)
-        
+
         layout = QVBoxLayout(sidebar)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
-        
-        # Logo section with gradient
+
+        # Logo section
         logo_frame = QFrame()
-        logo_frame.setFixedHeight(90)
-        logo_frame.setStyleSheet("""
-            QFrame {
+        logo_frame.setFixedHeight(DT.SIDEBAR_LOGO_HEIGHT)
+        logo_frame.setStyleSheet(f"""
+            QFrame {{
                 background: transparent;
-                border-bottom: 1px solid rgba(6, 182, 212, 0.15);
-            }
+                border-bottom: 1px solid {DT.BORDER_SUBTLE};
+            }}
         """)
         logo_layout = QHBoxLayout(logo_frame)
-        logo_layout.setContentsMargins(24, 0, 24, 0)
-        
+        logo_layout.setContentsMargins(DT.SPACE_XL, 0, DT.SPACE_XL, 0)
+
         logo_label = QLabel("⚡ NexusTrade")
-        logo_label.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
-        logo_label.setStyleSheet("""
-            color: qlineargradient(
-                x1:0, y1:0, x2:1, y2:0,
-                stop:0 #06b6d4, stop:1 #14b8a6
-            );
+        logo_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XL, DT.WEIGHT_BOLD))
+        logo_label.setStyleSheet(f"""
+            color: {DT.PRIMARY};
             background: transparent;
         """)
         logo_layout.addWidget(logo_label)
-        
+
         layout.addWidget(logo_frame)
-        
+
         # Navigation section
         nav_frame = QFrame()
         nav_frame.setStyleSheet("background: transparent;")
         nav_layout = QVBoxLayout(nav_frame)
-        nav_layout.setContentsMargins(12, 20, 12, 20)
-        nav_layout.setSpacing(6)
-        
+        nav_layout.setContentsMargins(DT.SPACE_MD, DT.SPACE_LG, DT.SPACE_MD, DT.SPACE_LG)
+        nav_layout.setSpacing(DT.SPACE_SM)
+
         nav_items = [
             ("📊", "Dashboard", 0),
             ("📈", "Auto Trading", 1),
@@ -208,97 +202,103 @@ class MainWindow(QMainWindow):
             ("🎯", "Strategy Builder", 3),
             ("⚙️", "Settings", 4),
         ]
-        
+
         self.nav_buttons = []
         for icon, name, index in nav_items:
             btn = self._create_nav_button(icon, name, index)
             nav_layout.addWidget(btn)
             self.nav_buttons.append(btn)
-        
+
         layout.addWidget(nav_frame)
         layout.addStretch()
-        
+
         # Status section
         status_frame = QFrame()
-        status_frame.setStyleSheet("""
-            QFrame {
-                background: rgba(15, 23, 42, 0.5);
-                border-top: 1px solid rgba(6, 182, 212, 0.15);
-                padding: 16px;
-            }
+        status_frame.setStyleSheet(f"""
+            QFrame {{
+                background: {DT.GLASS_DARK};
+                border-top: 1px solid {DT.BORDER_SUBTLE};
+                padding: {DT.SPACE_BASE}px;
+            }}
         """)
         status_layout = QVBoxLayout(status_frame)
-        status_layout.setContentsMargins(20, 16, 20, 16)
-        status_layout.setSpacing(12)
-        
-        # MT5 status with indicator
+        status_layout.setContentsMargins(DT.SPACE_LG, DT.SPACE_BASE, DT.SPACE_LG, DT.SPACE_BASE)
+        status_layout.setSpacing(DT.SPACE_MD)
+
+        # MT5 status indicator
         mt5_row = QHBoxLayout()
         mt5_indicator = QLabel("●")
-        mt5_indicator.setStyleSheet("color: #ef4444; font-size: 10px;")
+        mt5_indicator.setStyleSheet(f"color: {DT.DANGER}; font-size: {DT.FONT_XS}px;")
         mt5_row.addWidget(mt5_indicator)
         self.mt5_status_label = QLabel("MT5: Disconnected")
-        self.mt5_status_label.setStyleSheet("color: #94a3b8; font-size: 12px; font-weight: 500;")
+        self.mt5_status_label.setStyleSheet(f"""
+            color: {DT.TEXT_DISABLED};
+            font-size: {DT.FONT_SM}px;
+            font-weight: {DT.WEIGHT_MEDIUM};
+            font-family: {DT.FONT_FAMILY};
+        """)
         mt5_row.addWidget(self.mt5_status_label)
         mt5_row.addStretch()
         status_layout.addLayout(mt5_row)
-        
-        # Save indicator reference for updating
+
         self.mt5_indicator = mt5_indicator
-        
-        # Auto trading status with indicator
+
+        # Auto trading status indicator
         trading_row = QHBoxLayout()
         trading_indicator = QLabel("●")
-        trading_indicator.setStyleSheet("color: #64748b; font-size: 10px;")
+        trading_indicator.setStyleSheet(f"color: {DT.TEXT_PLACEHOLDER}; font-size: {DT.FONT_XS}px;")
         trading_row.addWidget(trading_indicator)
         self.trading_status_label = QLabel("Auto: Stopped")
-        self.trading_status_label.setStyleSheet("color: #94a3b8; font-size: 12px; font-weight: 500;")
+        self.trading_status_label.setStyleSheet(f"""
+            color: {DT.TEXT_DISABLED};
+            font-size: {DT.FONT_SM}px;
+            font-weight: {DT.WEIGHT_MEDIUM};
+            font-family: {DT.FONT_FAMILY};
+        """)
         trading_row.addWidget(self.trading_status_label)
         trading_row.addStretch()
         status_layout.addLayout(trading_row)
-        
-        # Save indicator reference
+
         self.trading_indicator = trading_indicator
-        
+
         layout.addWidget(status_frame)
-        
+
         return sidebar
     
     def _create_nav_button(self, icon: str, name: str, index: int) -> QPushButton:
-        """Create a navigation button - Modern style"""
+        """Create a navigation button with design system"""
         btn = QPushButton(f"  {icon}   {name}")
-        btn.setFixedHeight(48)
+        btn.setFixedHeight(DT.NAV_BUTTON_HEIGHT)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        btn.setStyleSheet("""
-            QPushButton {
+        btn.setStyleSheet(f"""
+            QPushButton {{
                 background: transparent;
-                color: #94a3b8;
+                color: {DT.TEXT_DISABLED};
                 border: none;
-                border-radius: 10px;
+                border-radius: {DT.RADIUS_LG}px;
                 text-align: left;
-                padding-left: 16px;
-                font-size: 14px;
-                font-weight: 500;
-            }
-            QPushButton:hover {
+                padding-left: {DT.SPACE_BASE}px;
+                font-size: {DT.FONT_BASE}px;
+                font-weight: {DT.WEIGHT_MEDIUM};
+                font-family: {DT.FONT_FAMILY};
+            }}
+            QPushButton:hover {{
                 background: rgba(6, 182, 212, 0.1);
-                color: #e2e8f0;
-            }
-            QPushButton:checked {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 rgba(6, 182, 212, 0.2), stop:1 rgba(20, 184, 166, 0.1)
-                );
-                color: #06b6d4;
-                border-left: 3px solid #06b6d4;
-                font-weight: 600;
-            }
+                color: {DT.TEXT_SECONDARY};
+            }}
+            QPushButton:checked {{
+                background: {StyleSheets.gradient_primary()};
+                color: white;
+                border-left: 3px solid {DT.PRIMARY};
+                font-weight: {DT.WEIGHT_SEMIBOLD};
+            }}
         """)
         btn.setCheckable(True)
         btn.clicked.connect(lambda: self._navigate_to(index))
-        
+
         if index == 0:
             btn.setChecked(True)
-        
+
         return btn
     
     def _navigate_to(self, index: int):
@@ -423,50 +423,49 @@ class MainWindow(QMainWindow):
             }
         """)
         control_layout = QHBoxLayout(control_group)
-        
-        # Start/Stop buttons
+
+        # Start/Stop buttons with design system
         self.start_btn = QPushButton("▶ Start Auto Trading")
-        self.start_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4ecca3;
-                color: #000;
-                padding: 15px 30px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #3db892; }
-            QPushButton:disabled { background-color: #666; color: #999; }
+        self.start_btn.setFixedHeight(DT.BUTTON_HEIGHT_LG)
+        self.start_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {StyleSheets.gradient_primary()};
+                border: none;
+                border-radius: {DT.RADIUS_LG}px;
+                padding: {DT.SPACE_BASE}px {DT.SPACE_2XL}px;
+                color: white;
+                font-size: {DT.FONT_BASE}px;
+                font-weight: {DT.WEIGHT_BOLD};
+                font-family: {DT.FONT_FAMILY};
+            }}
+            QPushButton:hover {{
+                background: {StyleSheets.gradient_primary_hover()};
+            }}
+            QPushButton:disabled {{
+                background: {DT.GLASS_MEDIUM};
+                color: {DT.TEXT_DISABLED};
+            }}
         """)
         self.start_btn.clicked.connect(self._start_auto_trading)
         control_layout.addWidget(self.start_btn)
-        
+
         self.stop_btn = QPushButton("⬛ Stop")
         self.stop_btn.setEnabled(False)
-        self.stop_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #e94560;
-                color: #fff;
-                padding: 15px 30px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: bold;
-            }
-            QPushButton:hover { background-color: #d63050; }
-            QPushButton:disabled { background-color: #666; color: #999; }
-        """)
+        self.stop_btn.setFixedHeight(DT.BUTTON_HEIGHT_LG)
+        self.stop_btn.setStyleSheet(StyleSheets.danger_button())
         self.stop_btn.clicked.connect(self._stop_auto_trading)
         control_layout.addWidget(self.stop_btn)
-        
+
         control_layout.addStretch()
-        
+
         # Interval selector
-        control_layout.addWidget(QLabel("Interval:"))
+        interval_label = QLabel("Interval:")
+        interval_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; font-family: {DT.FONT_FAMILY};")
+        control_layout.addWidget(interval_label)
         self.interval_spin = QDoubleSpinBox()
         self.interval_spin.setRange(10, 300)
         self.interval_spin.setValue(60)
         self.interval_spin.setSuffix(" sec")
-        self.interval_spin.setStyleSheet("background: #16213e; color: #fff; padding: 5px;")
         control_layout.addWidget(self.interval_spin)
         
         layout.addWidget(control_group)
@@ -558,19 +557,20 @@ class MainWindow(QMainWindow):
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(30, 30, 30, 30)
-        
+
         header = QLabel("ML Models")
         header.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
         header.setStyleSheet("color: #ffffff;")
         layout.addWidget(header)
-        
+
         # Model list
         models_group = QGroupBox("Available Models")
         models_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; }")
         models_layout = QVBoxLayout(models_group)
-        
+
         # List models
         models = self.model_security.list_models()
+        logger.info(f"Creating models page - found {len(models)} models: {models}")
         if models:
             for model_id in models:
                 model_row = QHBoxLayout()
@@ -1055,220 +1055,164 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Error: {error}", 5000)
     
     def _apply_styles(self):
-        """Apply global styles - Modern glassmorphism design"""
-        self.setStyleSheet("""
+        """Apply global styles using design system"""
+        self.setStyleSheet(f"""
             /* Main Window */
-            QMainWindow {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #0f172a, stop:1 #1e3a8a
-                );
-            }
-            
+            QMainWindow {{
+                background: {StyleSheets.gradient_background()};
+                font-family: {DT.FONT_FAMILY};
+            }}
+
             /* Labels */
-            QLabel {
-                color: #ffffff;
-                font-family: 'Segoe UI', Arial, sans-serif;
-            }
-            
+            QLabel {{
+                color: {DT.TEXT_PRIMARY};
+                font-family: {DT.FONT_FAMILY};
+            }}
+
             /* Group Boxes - Glassmorphism */
-            QGroupBox {
-                background: rgba(30, 41, 59, 0.6);
-                border: 1px solid rgba(6, 182, 212, 0.2);
-                border-radius: 16px;
-                margin-top: 16px;
-                padding: 20px;
-                font-size: 14px;
-                font-weight: 600;
-                color: #e2e8f0;
-            }
-            QGroupBox::title {
+            QGroupBox {{
+                {StyleSheets.glass_card()}
+                margin-top: {DT.SPACE_BASE}px;
+                font-size: {DT.FONT_BASE}px;
+                font-weight: {DT.WEIGHT_SEMIBOLD};
+                color: {DT.TEXT_SECONDARY};
+            }}
+            QGroupBox::title {{
                 subcontrol-origin: margin;
-                left: 20px;
-                padding: 0 10px;
-                color: #f8fafc;
-            }
-            
+                left: {DT.SPACE_LG}px;
+                padding: 0 {DT.SPACE_MD}px;
+                color: {DT.TEXT_PRIMARY};
+            }}
+
             /* Tables */
-            QTableWidget {
-                background: rgba(15, 23, 42, 0.6);
-                border: 1px solid rgba(6, 182, 212, 0.2);
-                border-radius: 12px;
-                gridline-color: rgba(6, 182, 212, 0.1);
-                color: #f8fafc;
+            QTableWidget {{
+                background: {DT.GLASS_DARK};
+                border: 1px solid {DT.BORDER_DEFAULT};
+                border-radius: {DT.RADIUS_XL}px;
+                gridline-color: {DT.BORDER_SUBTLE};
+                color: {DT.TEXT_PRIMARY};
                 selection-background-color: rgba(6, 182, 212, 0.3);
-            }
-            QTableWidget::item {
-                padding: 12px;
-                border-bottom: 1px solid rgba(6, 182, 212, 0.1);
-            }
-            QTableWidget::item:alternate {
-                background: rgba(30, 41, 59, 0.4);
-            }
-            QTableWidget::item:hover {
+            }}
+            QTableWidget::item {{
+                padding: {DT.SPACE_MD}px;
+                border-bottom: 1px solid {DT.BORDER_SUBTLE};
+            }}
+            QTableWidget::item:alternate {{
+                background: {DT.GLASS_LIGHT};
+            }}
+            QTableWidget::item:hover {{
                 background: rgba(6, 182, 212, 0.15);
-            }
-            QHeaderView::section {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:0, y2:1,
-                    stop:0 rgba(6, 182, 212, 0.2), stop:1 rgba(6, 182, 212, 0.1)
-                );
-                color: #94a3b8;
-                padding: 12px 16px;
+            }}
+            QHeaderView::section {{
+                background: {StyleSheets.gradient_primary()};
+                color: {DT.TEXT_PRIMARY};
+                padding: {DT.SPACE_MD}px {DT.SPACE_BASE}px;
                 border: none;
-                border-bottom: 2px solid rgba(6, 182, 212, 0.3);
-                font-weight: 600;
-                font-size: 12px;
+                border-bottom: 2px solid {DT.BORDER_MEDIUM};
+                font-weight: {DT.WEIGHT_SEMIBOLD};
+                font-size: {DT.FONT_SM}px;
                 text-transform: uppercase;
-            }
-            
-            /* Primary Buttons - Gradient */
-            QPushButton[class="primary"], QPushButton#startBtn {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #06b6d4, stop:1 #14b8a6
-                );
-                border: none;
-                border-radius: 10px;
-                padding: 14px 28px;
-                color: white;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton[class="primary"]:hover, QPushButton#startBtn:hover {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #0891b2, stop:1 #0d9488
-                );
-            }
-            
-            /* Danger Buttons */
-            QPushButton[class="danger"], QPushButton#stopBtn {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #f43f5e, stop:1 #e11d48
-                );
-                border: none;
-                border-radius: 10px;
-                padding: 14px 28px;
-                color: white;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton[class="danger"]:hover, QPushButton#stopBtn:hover {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #e11d48, stop:1 #be123c
-                );
-            }
-            
-            /* Secondary Buttons */
-            QPushButton {
-                background: rgba(30, 41, 59, 0.8);
-                border: 1px solid rgba(6, 182, 212, 0.3);
-                border-radius: 8px;
-                padding: 10px 20px;
-                color: #e2e8f0;
-                font-weight: 600;
-                font-size: 13px;
-            }
-            QPushButton:hover {
+            }}
+
+            /* Buttons - Secondary (default) */
+            QPushButton {{
+                background: {DT.GLASS_MEDIUM};
+                border: 1px solid {DT.BORDER_MEDIUM};
+                border-radius: {DT.RADIUS_MD}px;
+                padding: {DT.SPACE_MD}px {DT.SPACE_LG}px;
+                color: {DT.TEXT_SECONDARY};
+                font-weight: {DT.WEIGHT_SEMIBOLD};
+                font-size: {DT.FONT_SM}px;
+                font-family: {DT.FONT_FAMILY};
+            }}
+            QPushButton:hover {{
                 background: rgba(6, 182, 212, 0.2);
-                border: 1px solid rgba(6, 182, 212, 0.5);
-                color: #06b6d4;
-            }
-            QPushButton:pressed {
+                border: 1px solid {DT.BORDER_FOCUS};
+                color: {DT.PRIMARY};
+            }}
+            QPushButton:pressed {{
                 background: rgba(6, 182, 212, 0.3);
-            }
-            QPushButton:disabled {
+            }}
+            QPushButton:disabled {{
                 background: rgba(71, 85, 105, 0.5);
-                color: #64748b;
+                color: {DT.TEXT_DISABLED};
                 border: 1px solid rgba(100, 116, 139, 0.3);
-            }
-            
+            }}
+
             /* Input Fields */
-            QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
-                background: rgba(15, 23, 42, 0.6);
-                border: 1px solid rgba(6, 182, 212, 0.3);
-                border-radius: 8px;
-                padding: 12px 16px;
-                color: #f8fafc;
-                font-size: 14px;
-                selection-background-color: rgba(6, 182, 212, 0.4);
-            }
-            QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
-                border: 2px solid #06b6d4;
-                background: rgba(15, 23, 42, 0.8);
-            }
-            QLineEdit::placeholder {
-                color: #64748b;
-            }
-            
+            QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {{
+                {StyleSheets.input_field()}
+            }}
+            QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {{
+                border: 2px solid {DT.BORDER_STRONG};
+                background: {DT.GLASS_DARKEST};
+            }}
+            QLineEdit::placeholder {{
+                color: {DT.TEXT_PLACEHOLDER};
+            }}
+
             /* Scrollbars */
-            QScrollBar:vertical {
+            QScrollBar:vertical {{
                 background: rgba(15, 23, 42, 0.3);
                 width: 10px;
                 border-radius: 5px;
                 margin: 0;
-            }
-            QScrollBar::handle:vertical {
+            }}
+            QScrollBar::handle:vertical {{
                 background: rgba(6, 182, 212, 0.4);
                 border-radius: 5px;
                 min-height: 30px;
-            }
-            QScrollBar::handle:vertical:hover {
+            }}
+            QScrollBar::handle:vertical:hover {{
                 background: rgba(6, 182, 212, 0.6);
-            }
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
                 height: 0;
-            }
-            QScrollBar:horizontal {
+            }}
+            QScrollBar:horizontal {{
                 background: rgba(15, 23, 42, 0.3);
                 height: 10px;
                 border-radius: 5px;
-            }
-            QScrollBar::handle:horizontal {
+            }}
+            QScrollBar::handle:horizontal {{
                 background: rgba(6, 182, 212, 0.4);
                 border-radius: 5px;
                 min-width: 30px;
-            }
-            
+            }}
+
             /* Progress Bar */
-            QProgressBar {
-                background: rgba(15, 23, 42, 0.6);
-                border: 1px solid rgba(6, 182, 212, 0.2);
-                border-radius: 8px;
+            QProgressBar {{
+                background: {DT.GLASS_DARK};
+                border: 1px solid {DT.BORDER_DEFAULT};
+                border-radius: {DT.RADIUS_MD}px;
                 text-align: center;
-                color: #f8fafc;
-                font-weight: 600;
-            }
-            QProgressBar::chunk {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #06b6d4, stop:1 #14b8a6
-                );
-                border-radius: 7px;
-            }
-            
+                color: {DT.TEXT_PRIMARY};
+                font-weight: {DT.WEIGHT_SEMIBOLD};
+            }}
+            QProgressBar::chunk {{
+                background: {StyleSheets.gradient_primary()};
+                border-radius: {DT.RADIUS_SM}px;
+            }}
+
             /* Status Bar */
-            QStatusBar {
-                background: rgba(15, 23, 42, 0.8);
-                border-top: 1px solid rgba(6, 182, 212, 0.2);
-                color: #94a3b8;
-                font-size: 12px;
-                padding: 8px 16px;
-            }
-            
+            QStatusBar {{
+                background: {DT.GLASS_DARK};
+                border-top: 1px solid {DT.BORDER_DEFAULT};
+                color: {DT.TEXT_DISABLED};
+                font-size: {DT.FONT_SM}px;
+                padding: {DT.SPACE_SM}px {DT.SPACE_BASE}px;
+            }}
+
             /* Message Box */
-            QMessageBox {
-                background: #1e293b;
-            }
-            QMessageBox QLabel {
-                color: #f8fafc;
-            }
-            QMessageBox QPushButton {
+            QMessageBox {{
+                background: {DT.BG_DARK};
+            }}
+            QMessageBox QLabel {{
+                color: {DT.TEXT_PRIMARY};
+            }}
+            QMessageBox QPushButton {{
                 min-width: 80px;
-            }
+            }}
         """)
     
     def closeEvent(self, event):

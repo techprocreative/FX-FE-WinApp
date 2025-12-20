@@ -1,7 +1,16 @@
 @echo off
 REM ============================================
-REM NexusTrade Windows Connector - VPS Build Script
+REM NexusTrade Windows Connector - Build Script
 REM Easy deployment for Windows VPS
+REM
+REM This script:
+REM - Sets up Python virtual environment
+REM - Installs all dependencies
+REM - Cleans old build cache (NEW!)
+REM - Builds NexusTrade.exe with PyInstaller
+REM
+REM IMPORTANT: Always run this for clean builds
+REM to ensure UI changes are included!
 REM ============================================
 
 setlocal enabledelayedexpansion
@@ -62,6 +71,14 @@ if errorlevel 1 (
     goto :error
 )
 echo       PyInstaller ready
+
+REM Clean build artifacts and cache
+echo [4.5/6] Cleaning old build artifacts and cache...
+if exist "build" rmdir /s /q build
+if exist "dist" rmdir /s /q dist
+for /d /r %%d in (__pycache__) do @if exist "%%d" rmdir /s /q "%%d" 2>nul
+del /s /q *.pyc 2>nul
+echo       Build cache cleaned
 
 REM Create assets folder
 if not exist "assets" mkdir assets

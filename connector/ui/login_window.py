@@ -5,196 +5,209 @@ Login screen for Windows connector using Supabase authentication
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QLineEdit, QMessageBox, QFrame
+    QPushButton, QLineEdit, QFrame
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QLinearGradient, QBrush, QPalette, QColor
 from supabase import create_client, Client
 from loguru import logger
+
+from ui.design_system import DesignTokens as DT, StyleSheets
 
 
 class LoginWindow(QWidget):
     """Login window for Supabase authentication"""
-    
+
     login_successful = pyqtSignal(dict)  # Emits user data on successful login
-    
+
     def __init__(self, supabase_url: str, supabase_key: str):
         super().__init__()
         self.supabase: Client = create_client(supabase_url, supabase_key)
         self._setup_ui()
-    
+
     def _setup_ui(self):
-        """Setup the login UI"""
+        """Setup the login UI with design system"""
         self.setWindowTitle("NexusTrade - Login")
-        self.setFixedSize(450, 550)
-        self.setStyleSheet("""
-            QWidget {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 #0f172a, stop:1 #1e3a8a
-                );
-                color: white;
-                font-family: 'Segoe UI', Arial;
-            }
-            QLineEdit {
-                background: rgba(15, 23, 42, 0.6);
-                border: 1px solid rgba(6, 182, 212, 0.3);
-                border-radius: 8px;
-                padding: 12px 16px;
-                color: white;
-                font-size: 14px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #06b6d4;
-            }
-            QPushButton {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #06b6d4, stop:1 #14b8a6
-                );
-                border: none;
-                border-radius: 8px;
-                padding: 12px;
-                color: white;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #0891b2, stop:1 #0d9488
-                );
-            }
-            QPushButton:pressed {
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #0e7490, stop:1 #0f766e
-                );
-            }
-            QPushButton:disabled {
-                background: rgba(6, 182, 212, 0.3);
-            }
-            QLabel {
-                color: white;
-            }
-        """)
-        
+        self.setFixedSize(DT.LOGIN_WIDTH, DT.LOGIN_HEIGHT)
+
+        # Apply window background gradient
+        self._apply_window_gradient()
+
         # Main layout
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(40, 40, 40, 40)
-        layout.setSpacing(20)
-        
-        # Logo
-        logo = QLabel("NexusTrade")
+        layout.setContentsMargins(DT.SPACE_4XL, DT.SPACE_4XL, DT.SPACE_4XL, DT.SPACE_4XL)
+        layout.setSpacing(DT.SPACE_LG)
+
+        # Logo with proper gradient using QPalette
+        logo = QLabel("⚡ NexusTrade")
         logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        logo_font = QFont("Segoe UI", 32, QFont.Weight.Black)
+        logo_font = QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_5XL, DT.WEIGHT_BLACK)
         logo.setFont(logo_font)
-        logo.setStyleSheet("""
-            background: qlineargradient(
-                x1:0, y1:0, x2:1, y2:0,
-                stop:0 #06b6d4, stop:1 #14b8a6
-            );
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
-        """)
+
+        # Create gradient for logo text
+        gradient = QLinearGradient(0, 0, 1, 0)
+        gradient.setCoordinateMode(QLinearGradient.CoordinateMode.ObjectBoundingMode)
+        gradient.setColorAt(0, QColor(DT.PRIMARY))
+        gradient.setColorAt(1, QColor(DT.SECONDARY))
+
+        palette = logo.palette()
+        palette.setBrush(QPalette.ColorRole.WindowText, QBrush(gradient))
+        logo.setPalette(palette)
+
         layout.addWidget(logo)
-        
+
         # Subtitle
         subtitle = QLabel("Windows Connector")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        subtitle.setStyleSheet("color: #94a3b8; font-size: 14px;")
+        subtitle.setStyleSheet(f"""
+            color: {DT.TEXT_DISABLED};
+            font-size: {DT.FONT_BASE}px;
+            font-family: {DT.FONT_FAMILY};
+        """)
         layout.addWidget(subtitle)
-        
-        layout.addSpacing(20)
-        
-        # Card container
+
+        layout.addSpacing(DT.SPACE_2XL)
+
+        # Card container - glassmorphism
         card = QFrame()
-        card.setStyleSheet("""
-            QFrame {
-                background: rgba(30, 41, 59, 0.6);
-                border: 1px solid rgba(6, 182, 212, 0.3);
-                border-radius: 16px;
-            }
+        card.setStyleSheet(f"""
+            QFrame {{
+                {StyleSheets.glass_card()}
+            }}
         """)
         card_layout = QVBoxLayout(card)
-        card_layout.setContentsMargins(30, 30, 30, 30)
-        card_layout.setSpacing(20)
-        
+        card_layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
+        card_layout.setSpacing(DT.SPACE_LG)
+
         # Email field
         email_label = QLabel("Email")
-        email_label.setStyleSheet("color: #e2e8f0; font-weight: 600; font-size: 13px;")
+        email_label.setStyleSheet(f"""
+            color: {DT.TEXT_SECONDARY};
+            font-weight: {DT.WEIGHT_SEMIBOLD};
+            font-size: {DT.FONT_SM}px;
+            font-family: {DT.FONT_FAMILY};
+        """)
         card_layout.addWidget(email_label)
-        
+
         self.email_input = QLineEdit()
         self.email_input.setPlaceholderText("email@example.com")
+        self.email_input.setFixedHeight(DT.INPUT_HEIGHT)
         self.email_input.returnPressed.connect(self._handle_login)
+        self.email_input.setStyleSheet(f"""
+            QLineEdit {{
+                {StyleSheets.input_field()}
+            }}
+            QLineEdit:focus {{
+                border: 2px solid {DT.BORDER_FOCUS};
+                background: {DT.GLASS_DARKEST};
+            }}
+            QLineEdit::placeholder {{
+                color: {DT.TEXT_PLACEHOLDER};
+            }}
+        """)
         card_layout.addWidget(self.email_input)
-        
+
+        card_layout.addSpacing(DT.SPACE_SM)
+
         # Password field
         password_label = QLabel("Password")
-        password_label.setStyleSheet("color: #e2e8f0; font-weight: 600; font-size: 13px;")
+        password_label.setStyleSheet(f"""
+            color: {DT.TEXT_SECONDARY};
+            font-weight: {DT.WEIGHT_SEMIBOLD};
+            font-size: {DT.FONT_SM}px;
+            font-family: {DT.FONT_FAMILY};
+        """)
         card_layout.addWidget(password_label)
-        
+
         self.password_input = QLineEdit()
         self.password_input.setPlaceholderText("••••••••")
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_input.setFixedHeight(DT.INPUT_HEIGHT)
         self.password_input.returnPressed.connect(self._handle_login)
+        self.password_input.setStyleSheet(f"""
+            QLineEdit {{
+                {StyleSheets.input_field()}
+            }}
+            QLineEdit:focus {{
+                border: 2px solid {DT.BORDER_FOCUS};
+                background: {DT.GLASS_DARKEST};
+            }}
+            QLineEdit::placeholder {{
+                color: {DT.TEXT_PLACEHOLDER};
+            }}
+        """)
         card_layout.addWidget(self.password_input)
-        
-        card_layout.addSpacing(10)
-        
+
+        card_layout.addSpacing(DT.SPACE_BASE)
+
         # Login button
         self.login_btn = QPushButton("Login")
+        self.login_btn.setFixedHeight(DT.BUTTON_HEIGHT_LG)
         self.login_btn.clicked.connect(self._handle_login)
         self.login_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.login_btn.setStyleSheet(StyleSheets.primary_button())
         card_layout.addWidget(self.login_btn)
-        
+
         # Error label
         self.error_label = QLabel("")
         self.error_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.error_label.setStyleSheet("""
-            color: #f43f5e;
-            font-size: 12px;
-            padding: 8px;
+        self.error_label.setWordWrap(True)
+        self.error_label.setStyleSheet(f"""
+            color: {DT.DANGER};
+            font-size: {DT.FONT_SM}px;
+            font-family: {DT.FONT_FAMILY};
+            padding: {DT.SPACE_MD}px;
             background: rgba(244, 63, 94, 0.1);
             border: 1px solid rgba(244, 63, 94, 0.3);
-            border-radius: 6px;
+            border-radius: {DT.RADIUS_MD}px;
         """)
         self.error_label.hide()
         card_layout.addWidget(self.error_label)
-        
+
         layout.addWidget(card)
-        
+
         # Info text
         info = QLabel("Use the same account as the web dashboard")
         info.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        info.setStyleSheet("color: #94a3b8; font-size: 12px;")
+        info.setStyleSheet(f"""
+            color: {DT.TEXT_DISABLED};
+            font-size: {DT.FONT_SM}px;
+            font-family: {DT.FONT_FAMILY};
+        """)
         layout.addWidget(info)
-        
+
         layout.addStretch()
-    
+
+    def _apply_window_gradient(self):
+        """Apply gradient background to window"""
+        self.setStyleSheet(f"""
+            QWidget {{
+                background: {StyleSheets.gradient_background()};
+                font-family: {DT.FONT_FAMILY};
+            }}
+        """)
+
     def _handle_login(self):
         """Handle login button click"""
         email = self.email_input.text().strip()
         password = self.password_input.text()
-        
+
         if not email or not password:
             self._show_error("Please enter both email and password")
             return
-        
+
         # Disable UI during login
         self.login_btn.setEnabled(False)
         self.login_btn.setText("Logging in...")
         self.error_label.hide()
-        
+
         try:
             # Authenticate with Supabase
             response = self.supabase.auth.sign_in_with_password({
                 "email": email,
                 "password": password
             })
-            
+
             if response.user:
                 logger.info(f"Login successful for user: {email}")
                 user_data = {
@@ -206,7 +219,7 @@ class LoginWindow(QWidget):
                 self.close()
             else:
                 self._show_error("Login failed. Please check your credentials.")
-                
+
         except Exception as e:
             logger.error(f"Login error: {e}")
             error_msg = str(e)
@@ -216,11 +229,11 @@ class LoginWindow(QWidget):
                 self._show_error("Please confirm your email first")
             else:
                 self._show_error("Login failed. Please try again.")
-        
+
         finally:
             self.login_btn.setEnabled(True)
             self.login_btn.setText("Login")
-    
+
     def _show_error(self, message: str):
         """Show error message"""
         self.error_label.setText(message)

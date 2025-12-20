@@ -238,6 +238,7 @@ class ModelSecurity:
         models = []
         for file in self.models_dir.glob("*.nexmodel"):
             models.append(file.stem)
+        logger.debug(f"Found {len(models)} .nexmodel files in {self.models_dir}: {models}")
         return models
     
     def delete_model(self, model_id: str) -> bool:
