@@ -53,8 +53,36 @@ async def main():
         Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
     )
     
-    # Create main window
-    window = MainWindow(config)
+    # Show login window first
+    from ui.login_window import LoginWindow
+    
+    login_window = LoginWindow(
+        config.supabase.url,
+        config.supabase.anon_key
+    )
+    
+    user_data = {}
+    
+    def on_login_success(data):
+        nonlocal user_data
+        user_data = data
+        logger.info(f"User logged in: {data['email']}")
+    
+    login_window.login_successful.connect(on_login_success)
+    login_window.show()
+    
+    # Wait for login window to close
+    while login_window.isVisible():
+        app.processEvents()
+        await asyncio.sleep(0.1)
+    
+    # Check if login was successful
+    if not user_data:
+        logger.info("Login cancelled by user")
+        return 0
+    
+    # Create main window with user data
+    window = MainWindow(config, user_data)
     window.show()
     
     # Start API server in background

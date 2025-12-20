@@ -60,9 +60,10 @@ class MainWindow(QMainWindow):
     
     mt5_status_changed = pyqtSignal(bool)
     
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, user_data: dict):
         super().__init__()
         self.config = config
+        self.user_data = user_data  # Store user data from login
         self.mt5_client = MT5Client()
         self.model_security = ModelSecurity()
         self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
@@ -72,6 +73,12 @@ class MainWindow(QMainWindow):
         self.signal_labels: Dict[str, QLabel] = {}
         self.position_table: Optional[QTableWidget] = None
         self.stat_values: Dict[str, QLabel] = {}
+        
+        # Set MT5 client reference for API server
+        set_mt5_client(self.mt5_client)
+        
+        self._setup_ui()
+        self._setup_timers()
         
         # Set MT5 client reference for API server
         set_mt5_client(self.mt5_client)
