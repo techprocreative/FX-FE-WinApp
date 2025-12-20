@@ -99,14 +99,28 @@ a = Analysis(
         'ai',
         'ai.model_trainer',
     ],
-    hookspath=[],
-    hooksconfig={},
+    # Use custom hooks directory (overrides problematic tensorflow hook)
+    hookspath=['hooks'],
+    hooksconfig={
+        # Disable problematic TensorFlow/Keras hooks
+        'gi': {
+            'icons': [],
+            'themes': [],
+            'languages': [],
+        },
+    },
     runtime_hooks=[],
     excludes=[
-        # Heavy unused libraries
+        # Heavy unused libraries - Complete TensorFlow/Keras exclusion
         'tensorflow',
         'tensorflow.keras',
+        'tensorflow.python',
+        'tensorflow.core',
+        'tensorflow.compiler',
+        'tensorflow.lite',
         'keras',
+        'keras._tf_keras',
+        'keras._tf_keras.keras',
         # UI libraries not needed
         'matplotlib',
         'tkinter',
