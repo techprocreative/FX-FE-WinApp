@@ -74,50 +74,81 @@ class MainWindow(QMainWindow):
         self.config = config
         self.user_data = user_data  # Store user data from login
         self.mt5_client = MT5Client()
-        
-        # Lazy load heavy ML modules (speeds up initial window display)
-        from security.model_security import ModelSecurity
-        from trading.auto_trader import AutoTrader
-        
-        self.model_security = ModelSecurity()
-        self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
+
+        # PERFORMANCE: Defer heavy ML modules - only load when actually needed
+        # These will be lazy-loaded on first use in Trading/Models pages
+        self.model_security = None  # Loaded in _ensure_ml_loaded()
+        self.auto_trader = None  # Loaded in _ensure_ml_loaded()
         self.trader_thread: Optional['AutoTraderThread'] = None
-        
-        # Supabase model sync with authenticated client
-        from core.supabase_sync import SupabaseModelSync
-        self.supabase_sync = SupabaseModelSync(
-            config.supabase.url,
-            config.supabase.anon_key,
-            user_data['id'],
-            access_token=user_data.get('access_token')
-        )
-        
+
+        # PERFORMANCE: Defer Supabase sync - only load when Models page is accessed
+        self.supabase_sync = None  # Loaded in _ensure_supabase_loaded()
+        self._supabase_config = {
+            'url': config.supabase.url,
+            'anon_key': config.supabase.anon_key,
+            'user_id': user_data['id'],
+            'access_token': user_data.get('access_token')
+        }
+
         # UI references for updates
         self.signal_labels: Dict[str, QLabel] = {}
         self.position_table: Optional[QTableWidget] = None
         self.stat_values: Dict[str, QLabel] = {}
-        
+
+        # PERFORMANCE: Lazy-loaded pages (created on first navigation)
+        self._pages_loaded = {
+            'dashboard': False,
+            'trading': False,
+            'models': False,
+            'strategy': False,
+            'settings': False
+        }
+
         # Set MT5 client reference for API server
         set_mt5_client(self.mt5_client)
-        
+
         self._setup_ui()
         self._setup_timers()
-        
-        # Fetch models from Supabase after UI is ready (use threading for async)
-        import threading
-        def fetch_models_thread():
-            import asyncio
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                loop.run_until_complete(self._fetch_and_sync_models())
-                # Refresh models page UI on main thread
-                QTimer.singleShot(0, self._refresh_models_page_ui)
-            except Exception as e:
-                logger.error(f"Failed to fetch models on startup: {e}")
-            finally:
-                loop.close()
-        threading.Thread(target=fetch_models_thread, daemon=True).start()
+
+    def _ensure_ml_loaded(self):
+        """Lazy-load ML modules on first use (PERFORMANCE OPTIMIZATION)"""
+        if self.model_security is None:
+            logger.info("Loading ML modules (first use)...")
+            from security.model_security import ModelSecurity
+            from trading.auto_trader import AutoTrader
+
+            self.model_security = ModelSecurity()
+            self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
+            logger.info("✓ ML modules loaded")
+
+    def _ensure_supabase_loaded(self):
+        """Lazy-load Supabase sync on first use (PERFORMANCE OPTIMIZATION)"""
+        if self.supabase_sync is None:
+            logger.info("Loading Supabase sync (first use)...")
+            from core.supabase_sync import SupabaseModelSync
+
+            self.supabase_sync = SupabaseModelSync(
+                self._supabase_config['url'],
+                self._supabase_config['anon_key'],
+                self._supabase_config['user_id'],
+                access_token=self._supabase_config['access_token']
+            )
+            logger.info("✓ Supabase sync loaded")
+
+            # Trigger model sync in background
+            import threading
+            def fetch_models_thread():
+                import asyncio
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(self._fetch_and_sync_models())
+                    QTimer.singleShot(0, self._refresh_models_page_ui)
+                except Exception as e:
+                    logger.error(f"Failed to fetch models: {e}")
+                finally:
+                    loop.close()
+            threading.Thread(target=fetch_models_thread, daemon=True).start()
 
     
     def _setup_ui(self):
@@ -302,24 +333,57 @@ class MainWindow(QMainWindow):
         return btn
     
     def _navigate_to(self, index: int):
-        """Navigate to a page"""
+        """Navigate to a page - lazy load if not yet created (PERFORMANCE)"""
+        # Lazy load pages on first navigation
+        page_map = {
+            0: ('dashboard', None),
+            1: ('trading', self._create_trading_page),
+            2: ('models', self._create_models_page),
+            3: ('strategy', self._create_strategy_page),
+            4: ('settings', self._create_settings_page)
+        }
+
+        if index in page_map:
+            page_key, create_func = page_map[index]
+
+            # Load page if not yet loaded
+            if not self._pages_loaded[page_key] and create_func:
+                logger.info(f"Lazy-loading {page_key} page...")
+
+                # Ensure dependencies are loaded for specific pages
+                if page_key == 'trading':
+                    self._ensure_ml_loaded()
+                elif page_key == 'models':
+                    self._ensure_ml_loaded()
+                    self._ensure_supabase_loaded()
+                elif page_key == 'strategy':
+                    # Strategy builder needs to be initialized
+                    pass
+
+                # Create and replace placeholder
+                new_page = create_func()
+                old_widget = self.content_stack.widget(index)
+                self.content_stack.removeWidget(old_widget)
+                old_widget.deleteLater()
+                self.content_stack.insertWidget(index, new_page)
+                self._pages_loaded[page_key] = True
+                logger.info(f"✓ {page_key} page loaded")
+
         self.content_stack.setCurrentIndex(index)
         for i, btn in enumerate(self.nav_buttons):
             btn.setChecked(i == index)
     
     def _create_pages(self):
-        """Create content pages"""
+        """Create content pages - LAZY LOADED for performance"""
+        # PERFORMANCE: Only create Dashboard initially (index 0, visible on startup)
+        # Other pages created on first navigation
         self.content_stack.addWidget(self._create_dashboard_page())
-        self.content_stack.addWidget(self._create_trading_page())
-        self.content_stack.addWidget(self._create_models_page())
-        
-        # Strategy Builder
-        api_url = "https://fx.nusanexus.com"  # Production API URL
-        self.strategy_builder = StrategyBuilderTab(api_url, self.user_data)
-        self.strategy_builder.training_requested.connect(self._handle_training_request)
-        self.content_stack.addWidget(self.strategy_builder)
-        
-        self.content_stack.addWidget(self._create_settings_page())
+        self._pages_loaded['dashboard'] = True
+
+        # Add placeholder widgets for other pages (will be replaced on first navigation)
+        for _ in range(4):  # Trading, Models, Strategy, Settings
+            placeholder = QWidget()
+            self.content_stack.addWidget(placeholder)
     
     def _create_dashboard_page(self) -> QWidget:
         """Dashboard with account stats"""
@@ -592,7 +656,14 @@ class MainWindow(QMainWindow):
             logger.info("Models page UI refreshed")
         except Exception as e:
             logger.error(f"Failed to refresh models page UI: {e}")
-    
+
+    def _create_strategy_page(self) -> QWidget:
+        """Strategy Builder page - lazy loaded"""
+        api_url = "https://fx.nusanexus.com"  # Production API URL
+        self.strategy_builder = StrategyBuilderTab(api_url, self.user_data)
+        self.strategy_builder.training_requested.connect(self._handle_training_request)
+        return self.strategy_builder
+
     def _create_settings_page(self) -> QWidget:
         """Settings page with account, MT5, and logout"""
         page = QWidget()
@@ -769,6 +840,7 @@ class MainWindow(QMainWindow):
     
     def _refresh_models_from_cloud(self):
         """Refresh models from Supabase Storage"""
+        self._ensure_supabase_loaded()  # Ensure Supabase is loaded
         self.sync_status_label.setText("Syncing...")
         
         def do_sync():
@@ -947,6 +1019,8 @@ class MainWindow(QMainWindow):
     
     def _load_model(self, symbol: str):
         """Load model for symbol"""
+        self._ensure_ml_loaded()  # Ensure ML modules are loaded
+
         models = self.model_security.list_models()
         symbol_models = [m for m in models if symbol.lower() in m.lower()]
         
@@ -976,6 +1050,7 @@ class MainWindow(QMainWindow):
     
     def _train_models(self):
         """Train demo models"""
+        self._ensure_ml_loaded()  # Ensure ML modules are loaded
         from ai.model_trainer import train_demo_models
         
         reply = QMessageBox.question(
@@ -999,6 +1074,8 @@ class MainWindow(QMainWindow):
     
     def _start_auto_trading(self):
         """Start auto trading"""
+        self._ensure_ml_loaded()  # Ensure ML modules are loaded
+
         if not self.mt5_client.is_connected:
             QMessageBox.warning(self, "Error", "Please connect to MT5 first")
             return
@@ -1278,7 +1355,10 @@ class MainWindow(QMainWindow):
     def _handle_training_request(self, config: dict, symbol: str, model_name: str):
         """Handle custom model training request from Strategy Builder"""
         logger.info(f"Training request: {model_name} for {symbol}")
-        
+
+        # Ensure dependencies are loaded
+        self._ensure_supabase_loaded()
+
         # Import here to avoid circular dependency
         from ai.custom_trainer import CustomModelTrainer
         

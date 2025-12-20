@@ -112,17 +112,8 @@ async def main():
                 str(e)
             )
             return 1
-        
-        # Start API server
-        logger.info("Starting API server...")
-        try:
-            api_task = asyncio.create_task(start_api_server(config))
-            logger.info(f"✓ API server started on port {config.api_server.port}")
-        except Exception as e:
-            logger.error(f"Failed to start API server: {e}", exc_info=True)
-            # Continue anyway - API server is not critical
-        
-        # Show login window
+
+        # Show login window FIRST for fast startup
         logger.info("Creating login window...")
         try:
             login_window = LoginWindow(config.supabase.url, config.supabase.anon_key)
@@ -135,19 +126,29 @@ async def main():
                 str(e)
             )
             return 1
-        
+
         user_data = {}
-        
+
         # Handle successful login
         def on_login_success(data):
             nonlocal user_data
             user_data = data
             logger.info(f"User logged in: {data.get('email', 'unknown')}")
-        
+
         login_window.login_successful.connect(on_login_success)
         login_window.show()
         logger.info("✓ Login window displayed")
-        
+
+        # PERFORMANCE: Start API server in background AFTER login window is shown
+        # This allows user to start logging in while API server initializes
+        logger.info("Starting API server in background...")
+        try:
+            api_task = asyncio.create_task(start_api_server(config))
+            logger.info(f"✓ API server starting on port {config.api_server.port}")
+        except Exception as e:
+            logger.error(f"Failed to start API server: {e}", exc_info=True)
+            # Continue anyway - API server is not critical
+
         # Wait for login window to close
         while login_window.isVisible():
             app.processEvents()
