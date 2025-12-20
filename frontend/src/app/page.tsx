@@ -1,248 +1,367 @@
-'use client';
-
 import Link from 'next/link';
-import { useState } from 'react';
 
 export default function HomePage() {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
     return (
-        <main className="min-h-screen bg-slate-950 text-white selection:bg-indigo-500 selection:text-white overflow-x-hidden">
-
+        <div style={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
             {/* Navbar */}
-            <nav className="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/10 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        {/* Logo */}
-                        <div className="flex-shrink-0 cursor-pointer">
-                            <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                                NexusTrade
-                            </Link>
-                        </div>
-
-                        {/* Desktop Menu */}
-                        <div className="hidden md:block">
-                            <div className="ml-10 flex items-center space-x-8">
-                                <a href="#features" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Fitur</a>
-                                <a href="#pricing" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Harga</a>
-                                <a href="#stats" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">Statistik</a>
-                                <Link href="/auth/login" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
-                                    Masuk
-                                </Link>
-                                <Link href="/auth/signup" className="px-4 py-2 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow-lg shadow-indigo-500/30">
-                                    Daftar Sekarang
-                                </Link>
-                            </div>
-                        </div>
-
-                        {/* Mobile menu button */}
-                        <div className="md:hidden">
-                            <button
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 focus:outline-none"
-                            >
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    {isMenuOpen ? (
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    ) : (
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                    )}
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+            <nav style={{
+                padding: '1.5rem 2rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'rgba(0,0,0,0.2)',
+                backdropFilter: 'blur(10px)'
+            }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                    NexusTrade
+                </h1>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <Link href="/auth/login" style={{
+                        padding: '0.5rem 1.5rem',
+                        background: 'rgba(255,255,255,0.2)',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        color: 'white',
+                        fontWeight: '500'
+                    }}>
+                        Login
+                    </Link>
+                    <Link href="/auth/signup" style={{
+                        padding: '0.5rem 1.5rem',
+                        background: 'white',
+                        color: '#667eea',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold'
+                    }}>
+                        Daftar Gratis
+                    </Link>
                 </div>
-
-                {/* Mobile Menu */}
-                {isMenuOpen && (
-                    <div className="md:hidden bg-slate-900 border-b border-white/10">
-                        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                            <a href="#features" className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Fitur</a>
-                            <a href="#pricing" className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Harga</a>
-                            <Link href="/auth/login" className="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Masuk</Link>
-                            <Link href="/auth/signup" className="block px-3 py-2 rounded-md text-base font-medium bg-indigo-600 text-white">Daftar Sekarang</Link>
-                        </div>
-                    </div>
-                )}
             </nav>
 
-            {/* Hero Section */}
-            <header className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-                    <div className="inline-flex items-center px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium mb-8">
-                        <span className="w-2 h-2 bg-indigo-400 rounded-full mr-2 animate-pulse"></span>
-                        AI Trading Live Version 1.0
-                    </div>
-
-                    <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-8 leading-tight">
-                        Trading Forex Lebih Cerdas <br className="hidden sm:block" />
-                        dengan <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">AI Technology</span>
-                    </h1>
-
-                    <p className="mt-4 max-w-2xl mx-auto text-xl text-slate-400 mb-10">
-                        Automatisasi trading Anda dengan algoritma Machine Learning canggih.
-                        Analisis data pasar real-time tanpa emosi, 24/7.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/auth/signup"
-                            className="px-8 py-4 bg-white text-slate-900 rounded-xl font-bold text-lg hover:bg-gray-100 transition-transform hover:-translate-y-1 shadow-xl shadow-white/10">
-                            Coba Demo Gratis
-                        </Link>
-                        <a href="#features"
-                            className="px-8 py-4 bg-slate-800 text-white rounded-xl font-bold text-lg hover:bg-slate-700 transition-colors border border-slate-700">
-                            Pelajari Fitur
-                        </a>
-                    </div>
+            {/* Hero */}
+            <div style={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: '6rem 2rem',
+                textAlign: 'center'
+            }}>
+                <div style={{
+                    display: 'inline-block',
+                    padding: '0.5rem 1rem',
+                    background: 'rgba(255,255,255,0.2)',
+                    borderRadius: '20px',
+                    fontSize: '0.875rem',
+                    marginBottom: '2rem'
+                }}>
+                    🚀 AI Trading Platform v1.0
                 </div>
 
-                {/* Background Decor */}
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl -z-10 opacity-30 pointer-events-none">
-                    <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-                    <div className="absolute top-20 right-10 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-                </div>
-            </header>
+                <h1 style={{
+                    fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
+                    fontWeight: '900',
+                    lineHeight: '1.2',
+                    marginBottom: '1.5rem'
+                }}>
+                    Trading Forex dengan<br />
+                    Kecerdasan Buatan
+                </h1>
 
-            {/* Stats Section */}
-            <section id="stats" className="py-12 bg-slate-900 border-y border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-white mb-1">$1.2M+</div>
-                            <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Trading Volume</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-white mb-1">98.5%</div>
-                            <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest">AI Accuracy</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-white mb-1">24/7</div>
-                            <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Market Monitor</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-3xl font-bold text-white mb-1">&lt;50ms</div>
-                            <div className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Execution Speed</div>
-                        </div>
+                <p style={{
+                    fontSize: '1.25rem',
+                    maxWidth: '600px',
+                    margin: '0 auto 3rem',
+                    opacity: 0.95,
+                    lineHeight: '1.6'
+                }}>
+                    Platform auto-trading yang menggabungkan Machine Learning dengan analisis teknikal untuk hasil maksimal
+                </p>
+
+                <div style={{
+                    display: 'flex',
+                    gap: '1rem',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap'
+                }}>
+                    <Link href="/auth/signup" style={{
+                        padding: '1rem 2.5rem',
+                        background: 'white',
+                        color: '#667eea',
+                        borderRadius: '12px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '1.125rem',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                    }}>
+                        Mulai Sekarang →
+                    </Link>
+                    <a href="#features" style={{
+                        padding: '1rem 2.5rem',
+                        background: 'rgba(255,255,255,0.2)',
+                        color: 'white',
+                        borderRadius: '12px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '1.125rem',
+                        border: '2px solid rgba(255,255,255,0.3)'
+                    }}>
+                        Lihat Fitur
+                    </a>
+                </div>
+            </div>
+
+            {/* Stats */}
+            <div style={{
+                background: 'rgba(0,0,0,0.2)',
+                padding: '3rem 2rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)'
+            }}>
+                <div style={{
+                    maxWidth: '1200px',
+                    margin: '0 auto',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '2rem',
+                    textAlign: 'center'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>$1.2M+</div>
+                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Trading Volume</div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>98.5%</div>
+                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>AI Accuracy</div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>24/7</div>
+                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Auto Trading</div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>&lt;50ms</div>
+                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Execution</div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* Features Grid */}
-            <section id="features" className="py-24 bg-slate-950 relative">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-white mb-4">Fitur Utama</h2>
-                        <p className="text-slate-400 max-w-2xl mx-auto">Semua yang Anda butuhkan untuk trading next-level.</p>
+            {/* Features */}
+            <div id="features" style={{
+                maxWidth: '1200px',
+                margin: '0 auto',
+                padding: '6rem 2rem'
+            }}>
+                <h2 style={{
+                    fontSize: '2.5rem',
+                    fontWeight: 'bold',
+                    textAlign: 'center',
+                    marginBottom: '4rem'
+                }}>
+                    Fitur Unggulan
+                </h2>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '2rem'
+                }}>
+                    <div style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '2rem',
+                        borderRadius: '16px',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧠</div>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                            AI Strategy Generator
+                        </h3>
+                        <p style={{ opacity: 0.9, lineHeight: '1.6' }}>
+                            Buat strategi trading kompleks hanya dengan menjelaskan ide Anda dalam bahasa sehari-hari
+                        </p>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="bg-slate-900 p-8 rounded-2xl border border-white/5 hover:border-indigo-500/50 transition-colors group">
-                            <div className="w-12 h-12 bg-indigo-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-indigo-500/20 transition-colors">
-                                <span className="text-2xl">🧠</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-3">AI Strategy Generator</h3>
-                            <p className="text-slate-400 leading-relaxed">
-                                Buat strategi trading kompleks hanya dengan menjelaskan ide Anda dalam bahasa sehari-hari. AI akan menulis kodenya.
-                            </p>
-                        </div>
+                    <div style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '2rem',
+                        borderRadius: '16px',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚡</div>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                            Ultra-Fast Backtesting
+                        </h3>
+                        <p style={{ opacity: 0.9, lineHeight: '1.6' }}>
+                            Validasi strategi dengan data historis 5 tahun dalam hitungan detik
+                        </p>
+                    </div>
 
-                        {/* Feature 2 */}
-                        <div className="bg-slate-900 p-8 rounded-2xl border border-white/5 hover:border-purple-500/50 transition-colors group">
-                            <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-purple-500/20 transition-colors">
-                                <span className="text-2xl">⚡</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-3">Ultra-Fast Backtesting</h3>
-                            <p className="text-slate-400 leading-relaxed">
-                                Validasi strategi Anda dengan data historis 5 tahun dalam hitungan detik. Optimasi parameter secara otomatis.
-                            </p>
-                        </div>
-
-                        {/* Feature 3 */}
-                        <div className="bg-slate-900 p-8 rounded-2xl border border-white/5 hover:border-pink-500/50 transition-colors group">
-                            <div className="w-12 h-12 bg-pink-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-pink-500/20 transition-colors">
-                                <span className="text-2xl">🤖</span>
-                            </div>
-                            <h3 className="text-xl font-bold text-white mb-3">ML Auto-Trading</h3>
-                            <p className="text-slate-400 leading-relaxed">
-                                Biarkan model Machine Learning kami mengeksekusi trade 24/7 berdasarkan probabilitas statistik tertinggi.
-                            </p>
-                        </div>
+                    <div style={{
+                        background: 'rgba(255,255,255,0.1)',
+                        padding: '2rem',
+                        borderRadius: '16px',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255,255,255,0.2)'
+                    }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                            ML Auto-Trading
+                        </h3>
+                        <p style={{ opacity: 0.9, lineHeight: '1.6' }}>
+                            Model Machine Learning mengeksekusi trade 24/7 berdasarkan probabilitas tertinggi
+                        </p>
                     </div>
                 </div>
-            </section>
+            </div>
 
             {/* Pricing */}
-            <section id="pricing" className="py-24 bg-slate-900 border-t border-white/5">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold text-white mb-4">Paket Langganan</h2>
-                        <p className="text-slate-400">Pilih paket yang sesuai kebutuhan trading Anda.</p>
-                    </div>
+            <div style={{
+                background: 'rgba(0,0,0,0.2)',
+                padding: '6rem 2rem',
+                borderTop: '1px solid rgba(255,255,255,0.1)'
+            }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <h2 style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        textAlign: 'center',
+                        marginBottom: '4rem'
+                    }}>
+                        Paket Langganan
+                    </h2>
 
-                    <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                        gap: '2rem',
+                        maxWidth: '1000px',
+                        margin: '0 auto'
+                    }}>
                         {/* Free */}
-                        <div className="bg-slate-950 p-8 rounded-2xl border border-white/10 flex flex-col">
-                            <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-slate-300">Starter</h3>
-                                <div className="text-3xl font-bold text-white mt-2">Free</div>
+                        <div style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            padding: '2rem',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255,255,255,0.2)'
+                        }}>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Starter</h3>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                                Gratis
                             </div>
-                            <ul className="space-y-3 mb-8 flex-1 text-slate-400 text-sm">
-                                <li className="flex gap-2">✓ <span>Manual Trading</span></li>
-                                <li className="flex gap-2">✓ <span>30 Hari Data History</span></li>
-                                <li className="flex gap-2">✓ <span>10 AI Request/hari</span></li>
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', opacity: 0.9 }}>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ Manual Trading</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ 30 Hari History</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ 10 AI Request/hari</li>
                             </ul>
-                            <Link href="/auth/signup" className="w-full py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 text-center transition-colors">
+                            <Link href="/auth/signup" style={{
+                                display: 'block',
+                                padding: '0.75rem',
+                                background: 'rgba(255,255,255,0.2)',
+                                borderRadius: '8px',
+                                textAlign: 'center',
+                                textDecoration: 'none',
+                                color: 'white',
+                                fontWeight: 'bold'
+                            }}>
                                 Mulai Gratis
                             </Link>
                         </div>
 
                         {/* Pro */}
-                        <div className="bg-gradient-to-b from-indigo-900/50 to-slate-900 p-8 rounded-2xl border border-indigo-500/30 flex flex-col relative overflow-hidden">
-                            <div className="absolute top-0 right-0 bg-indigo-500 text-white text-xs px-3 py-1 rounded-bl-lg font-bold">POPULAR</div>
-                            <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-indigo-300">Pro Trader</h3>
-                                <div className="text-3xl font-bold text-white mt-2">Rp 449rb<span className="text-sm text-slate-400 font-normal">/bulan</span></div>
+                        <div style={{
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))',
+                            padding: '2rem',
+                            borderRadius: '16px',
+                            border: '2px solid rgba(255,255,255,0.4)',
+                            position: 'relative',
+                            transform: 'scale(1.05)'
+                        }}>
+                            <div style={{
+                                position: 'absolute',
+                                top: '-12px',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                background: 'white',
+                                color: '#667eea',
+                                padding: '0.25rem 1rem',
+                                borderRadius: '20px',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold'
+                            }}>
+                                POPULER
                             </div>
-                            <ul className="space-y-3 mb-8 flex-1 text-slate-300 text-sm">
-                                <li className="flex gap-2 text-white">✓ <span>Semua fitur Starter</span></li>
-                                <li className="flex gap-2 text-white">✓ <span>Auto-Trading (ML Models)</span></li>
-                                <li className="flex gap-2 text-white">✓ <span>Unlimited Backtesting</span></li>
-                                <li className="flex gap-2 text-white">✓ <span>500 AI Request/hari</span></li>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Pro Trader</h3>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                                Rp 449K<span style={{ fontSize: '1rem', fontWeight: 'normal' }}>/bln</span>
+                            </div>
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem' }}>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ AI Strategy Generator</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ ML Auto-Trading</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ Unlimited Backtesting</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ Priority Support</li>
                             </ul>
-                            <Link href="/auth/signup" className="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 text-center transition-colors shadow-lg shadow-indigo-500/20">
+                            <Link href="/auth/signup" style={{
+                                display: 'block',
+                                padding: '0.75rem',
+                                background: 'white',
+                                color: '#667eea',
+                                borderRadius: '8px',
+                                textAlign: 'center',
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                            }}>
                                 Upgrade Pro
                             </Link>
                         </div>
 
                         {/* Enterprise */}
-                        <div className="bg-slate-950 p-8 rounded-2xl border border-white/10 flex flex-col">
-                            <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-slate-300">Enterprise</h3>
-                                <div className="text-3xl font-bold text-white mt-2">Contact Us</div>
+                        <div style={{
+                            background: 'rgba(255,255,255,0.1)',
+                            padding: '2rem',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255,255,255,0.2)'
+                        }}>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Enterprise</h3>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                                Custom
                             </div>
-                            <ul className="space-y-3 mb-8 flex-1 text-slate-400 text-sm">
-                                <li className="flex gap-2">✓ <span>Custom AI Models</span></li>
-                                <li className="flex gap-2">✓ <span>Dedicated Server</span></li>
-                                <li className="flex gap-2">✓ <span>White Label</span></li>
-                                <li className="flex gap-2">✓ <span>24/7 Priority Support</span></li>
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', opacity: 0.9 }}>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ Custom AI Models</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ Dedicated Server</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ White Label</li>
+                                <li style={{ marginBottom: '0.75rem' }}>✓ 24/7 Support</li>
                             </ul>
-                            <Link href="/auth/signup" className="w-full py-3 bg-slate-800 text-white rounded-lg font-semibold hover:bg-slate-700 text-center transition-colors">
+                            <Link href="/auth/signup" style={{
+                                display: 'block',
+                                padding: '0.75rem',
+                                background: 'rgba(255,255,255,0.2)',
+                                borderRadius: '8px',
+                                textAlign: 'center',
+                                textDecoration: 'none',
+                                color: 'white',
+                                fontWeight: 'bold'
+                            }}>
                                 Hubungi Sales
                             </Link>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
             {/* Footer */}
-            <footer className="bg-slate-950 border-t border-white/5 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <p className="text-slate-500 text-sm">
-                        &copy; {new Date().getFullYear()} NexusTrade. All rights reserved.
-                    </p>
-                </div>
+            <footer style={{
+                padding: '3rem 2rem',
+                textAlign: 'center',
+                borderTop: '1px solid rgba(255,255,255,0.1)',
+                opacity: 0.8
+            }}>
+                <p>© 2024 NexusTrade. All rights reserved.</p>
             </footer>
-        </main>
+        </div>
     );
 }
