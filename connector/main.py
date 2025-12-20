@@ -87,7 +87,7 @@ async def main():
         logger.info("Creating QApplication...")
         app = QApplication(sys.argv)
         app.setApplicationName("NexusTrade")
-        app.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
+        # Note: AA_EnableHighDpiScaling is deprecated in PyQt6 - enabled by default
         logger.info("✓ QApplication created")
         
         # Load configuration
