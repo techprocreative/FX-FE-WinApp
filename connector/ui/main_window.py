@@ -22,6 +22,7 @@ from core.mt5_client import MT5Client
 from security.model_security import ModelSecurity
 from trading.auto_trader import AutoTrader, Signal, TradingConfig
 from api.server import set_mt5_client
+from ui.strategy_builder import StrategyBuilderTab
 
 
 class AutoTraderThread(QThread):
@@ -144,7 +145,8 @@ class MainWindow(QMainWindow):
             ("📊 Dashboard", 0),
             ("📈 Auto Trading", 1),
             ("🤖 ML Models", 2),
-            ("⚙️ Settings", 3),
+            ("🎯 Strategy Builder", 3),
+            ("⚙️ Settings", 4),
         ]
         
         self.nav_buttons = []
@@ -210,6 +212,13 @@ class MainWindow(QMainWindow):
         self.content_stack.addWidget(self._create_dashboard_page())
         self.content_stack.addWidget(self._create_trading_page())
         self.content_stack.addWidget(self._create_models_page())
+        
+        # Strategy Builder
+        api_url = "https://your-app.vercel.app"  # TODO: Configure from settings
+        self.strategy_builder = StrategyBuilderTab(api_url, self.user_data)
+        self.strategy_builder.training_requested.connect(self._handle_training_request)
+        self.content_stack.addWidget(self.strategy_builder)
+        
         self.content_stack.addWidget(self._create_settings_page())
     
     def _create_dashboard_page(self) -> QWidget:
@@ -794,3 +803,21 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
+    
+    def _handle_training_request(self, config: dict, symbol: str, model_name: str):
+        """Handle custom model training request from Strategy Builder"""
+        logger.info(f"Training request: {model_name} for {symbol}")
+        
+        # TODO: Implement custom model training
+        # This will integrate with train_gru_xgboost_hybrid.py
+        # For now, show placeholder
+        QMessageBox.information(
+            self,
+            "Training Started",
+            f"Model training for '{model_name}' will be implemented in the next phase.\n\n"
+            f"Config: {len(config.get('features', []))} features\n"
+            f"Symbol: {symbol}"
+        )
+        
+        # Update progress in strategy builder
+        self.strategy_builder.update_progress("Training will be implemented soon", 100)
