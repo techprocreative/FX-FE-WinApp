@@ -270,6 +270,36 @@ export default function DashboardPage() {
                             {tab.label}
                         </button>
                     ))}
+
+                    {/* Strategy Builder Link */}
+                    <Link href="/dashboard/strategy-builder" style={{ textDecoration: 'none', display: 'block', marginTop: '0.5rem' }}>
+                        <div style={{
+                            width: '100%',
+                            padding: '0.875rem 1rem',
+                            background: 'transparent',
+                            border: '1px solid transparent',
+                            borderRadius: '0.75rem',
+                            color: '#94a3b8',
+                            fontSize: '0.9375rem',
+                            fontWeight: '500',
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.75rem',
+                            transition: 'all 0.3s'
+                        }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(6, 182, 212, 0.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'transparent';
+                            }}
+                        >
+                            <span>🎯</span>
+                            <span>Strategy Builder</span>
+                        </div>
+                    </Link>
                 </nav>
 
                 {/* User Section */}
