@@ -808,16 +808,39 @@ class MainWindow(QMainWindow):
         """Handle custom model training request from Strategy Builder"""
         logger.info(f"Training request: {model_name} for {symbol}")
         
-        # TODO: Implement custom model training
-        # This will integrate with train_gru_xgboost_hybrid.py
-        # For now, show placeholder
-        QMessageBox.information(
-            self,
-            "Training Started",
-            f"Model training for '{model_name}' will be implemented in the next phase.\n\n"
-            f"Config: {len(config.get('features', []))} features\n"
-            f"Symbol: {symbol}"
-        )
+        # Import here to avoid circular dependency
+        from ai.custom_trainer import CustomModelTrainer
         
-        # Update progress in strategy builder
-        self.strategy_builder.update_progress("Training will be implemented soon", 100)
+        # Create trainer with progress callback
+        def on_progress(message: str, percent: int):
+            self.strategy_builder.update_progress(message, percent)
+        
+        trainer = CustomModelTrainer(config, symbol, model_name, on_progress)
+        
+        # Start training in background thread
+        import threading
+        
+        def train_thread():
+            try:
+                result = trainer.train()
+                
+                # Show success message
+                QMessageBox.information(
+                    self,
+                    "Training Complete",
+                    f"Model '{model_name}' trained successfully!\n\n"
+                    f"Win Rate: {result.get('win_rate', 0):.1f}%\n"
+                    f"Kelly Fraction: {result.get('kelly_fraction', 0):.2f}\n"
+                    f"Model ID: {result.get('model_id', 'N/A')}"
+                )
+                
+            except Exception as e:
+                logger.exception(f"Training failed: {e}")
+                QMessageBox.critical(
+                    self,
+                    "Training Failed",
+                    f"Failed to train model:\n{str(e)}"
+                )
+        
+        thread = threading.Thread(target=train_thread, daemon=True)
+        thread.start()

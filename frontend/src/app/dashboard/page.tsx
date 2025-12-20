@@ -51,10 +51,11 @@ export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState('overview');
 
     // Data states
-    const [mt5Connection, setMt5Connection] = useState<MT5Connection | null>(null);
-    const [trades, setTrades] = useState<Trade[]>([]);
-    const [mlModels, setMlModels] = useState<MLModel[]>([]);
-    const [subscription, setSubscription] = useState<Subscription | null>(null);
+    const [mt5Connection, setMt5Connection] = useState<any>(null);
+    const [trades, setTrades] = useState<any[]>([]);
+    const [mlModels, setMlModels] = useState<any[]>([]);
+    const [subscription, setSubscription] = useState<any>(null);
+    const [llmUsage, setLlmUsage] = useState<number>(0);
     const [accountBalance, setAccountBalance] = useState(0);
     const [todayPL, setTodayPL] = useState(0);
 
@@ -145,6 +146,20 @@ export default function DashboardPage() {
                 expires_at: ''
             });
         }
+
+        // Fetch LLM usage (current month)
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count } = await supabase
+            .from('llm_logs')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .eq('request_type', 'strategy_generation')
+            .gte('created_at', startOfMonth.toISOString());
+
+        setLlmUsage(count || 0);
     };
 
     const handleLogout = async () => {
@@ -618,8 +633,7 @@ export default function DashboardPage() {
                                     {subscription?.tier === 'free' || !subscription ? (
                                         <div>
                                             <p style={{ color: '#06b6d4', fontWeight: '600', margin: 0 }}>
-                                                {/* TODO: Fetch actual usage */}
-                                                0/10 used this month
+                                                {llmUsage}/10 used this month
                                             </p>
                                             <p style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.5rem', marginBottom: 0 }}>
                                                 Upgrade to Pro for unlimited AI generations
