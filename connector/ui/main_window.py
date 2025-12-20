@@ -89,8 +89,19 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._setup_timers()
         
-        # Fetch models from Supabase after UI is ready
-        asyncio.create_task(self._fetch_and_sync_models())
+        # Fetch models from Supabase after UI is ready (use threading for async)
+        import threading
+        def fetch_models_thread():
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(self._fetch_and_sync_models())
+            except Exception as e:
+                logger.error(f"Failed to fetch models on startup: {e}")
+            finally:
+                loop.close()
+        threading.Thread(target=fetch_models_thread, daemon=True).start()
 
     
     def _setup_ui(self):
@@ -516,19 +527,75 @@ class MainWindow(QMainWindow):
         return page
     
     def _create_settings_page(self) -> QWidget:
-        """Settings page"""
+        """Settings page with account, MT5, and logout"""
         page = QWidget()
         layout = QVBoxLayout(page)
         layout.setContentsMargins(30, 30, 30, 30)
+        layout.setSpacing(20)
         
         header = QLabel("Settings")
         header.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
         header.setStyleSheet("color: #ffffff;")
         layout.addWidget(header)
         
+        # Account section
+        account_group = QGroupBox("Account")
+        account_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-top: 10px; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }")
+        account_layout = QVBoxLayout(account_group)
+        
+        # User info
+        user_email = self.user_data.get('email', 'Unknown')
+        email_label = QLabel(f"Logged in as: {user_email}")
+        email_label.setStyleSheet("color: #4ecca3; font-size: 14px; font-weight: bold;")
+        account_layout.addWidget(email_label)
+        
+        # Logout button
+        logout_btn = QPushButton("🚪 Logout")
+        logout_btn.setStyleSheet("""
+            QPushButton {
+                background: #e94560;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover { background: #c73e54; }
+        """)
+        logout_btn.clicked.connect(self._handle_logout)
+        account_layout.addWidget(logout_btn)
+        
+        layout.addWidget(account_group)
+        
+        # Model Sync section
+        sync_group = QGroupBox("Model Sync")
+        sync_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-top: 10px; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }")
+        sync_layout = QVBoxLayout(sync_group)
+        
+        refresh_btn = QPushButton("🔄 Refresh Models from Cloud")
+        refresh_btn.setStyleSheet("""
+            QPushButton {
+                background: #06b6d4;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 6px;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton:hover { background: #0891b2; }
+        """)
+        refresh_btn.clicked.connect(self._refresh_models_from_cloud)
+        sync_layout.addWidget(refresh_btn)
+        
+        self.sync_status_label = QLabel("Last sync: Never")
+        self.sync_status_label.setStyleSheet("color: #94a3b8; font-size: 12px;")
+        sync_layout.addWidget(self.sync_status_label)
+        
+        layout.addWidget(sync_group)
+        
         # MT5 connection
         mt5_group = QGroupBox("MT5 Connection")
-        mt5_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; }")
+        mt5_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-top: 10px; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }")
         mt5_layout = QGridLayout(mt5_group)
         
         mt5_layout.addWidget(QLabel("Login:"), 0, 0)
@@ -556,6 +623,65 @@ class MainWindow(QMainWindow):
         layout.addStretch()
         
         return page
+    
+    def _handle_logout(self):
+        """Handle logout from Supabase"""
+        reply = QMessageBox.question(
+            self,
+            "Logout",
+            "Are you sure you want to logout?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                # Sign out from Supabase
+                from supabase import create_client
+                client = create_client(self.config.supabase.url, self.config.supabase.anon_key)
+                client.auth.sign_out()
+                logger.info("User logged out")
+                
+                # Update MT5 status to offline
+                if self.supabase_sync:
+                    import threading
+                    def update_status():
+                        import asyncio
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        loop.run_until_complete(self.supabase_sync.update_mt5_connection_status(is_online=False))
+                        loop.close()
+                    threading.Thread(target=update_status, daemon=True).start()
+                
+                # Close and restart app
+                QMessageBox.information(self, "Logged Out", "You have been logged out. The application will now restart.")
+                self.close()
+                
+            except Exception as e:
+                logger.error(f"Logout error: {e}")
+                QMessageBox.warning(self, "Error", f"Logout failed: {e}")
+    
+    def _refresh_models_from_cloud(self):
+        """Refresh models from Supabase Storage"""
+        self.sync_status_label.setText("Syncing...")
+        
+        def do_sync():
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                loop.run_until_complete(self._fetch_and_sync_models())
+                # Update UI from main thread
+                from datetime import datetime
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                self.sync_status_label.setText(f"Last sync: {timestamp}")
+            except Exception as e:
+                logger.error(f"Sync failed: {e}")
+                self.sync_status_label.setText(f"Sync failed: {e}")
+            finally:
+                loop.close()
+        
+        import threading
+        threading.Thread(target=do_sync, daemon=True).start()
     
     def _create_stat_card(self, title: str, value: str, color: str) -> tuple:
         """Create a statistics card, return (card, value_label)"""
@@ -617,9 +743,8 @@ class MainWindow(QMainWindow):
         
         self.mt5_status_changed.emit(is_connected)
         
-        # Sync MT5 status to Supabase for dashboard
+        # Sync MT5 status to Supabase for dashboard (use threading for async)
         if hasattr(self, 'supabase_sync') and self.supabase_sync:
-            import asyncio
             try:
                 # Get MT5 login/server info if connected
                 mt5_login = ""
@@ -630,13 +755,23 @@ class MainWindow(QMainWindow):
                         mt5_login = str(account.login) if hasattr(account, 'login') else ""
                         mt5_server = account.server if hasattr(account, 'server') else ""
                 
-                asyncio.create_task(
-                    self.supabase_sync.update_mt5_connection_status(
-                        is_online=is_connected,
-                        mt5_login=mt5_login,
-                        mt5_server=mt5_server
-                    )
-                )
+                # Use threading for async call
+                import threading
+                def sync_status():
+                    import asyncio
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        loop.run_until_complete(
+                            self.supabase_sync.update_mt5_connection_status(
+                                is_online=is_connected,
+                                mt5_login=mt5_login,
+                                mt5_server=mt5_server
+                            )
+                        )
+                    finally:
+                        loop.close()
+                threading.Thread(target=sync_status, daemon=True).start()
             except Exception as e:
                 logger.error(f"Failed to sync MT5 status to Supabase: {e}")
     
@@ -856,7 +991,9 @@ class MainWindow(QMainWindow):
                 local_path = await self.supabase_sync.download_model(model_meta)
                 
                 if local_path:
-                    logger.success(f"Model {model_meta['model_name']} ready")
+                    # Use 'name' column which exists in the database
+                    model_name = model_meta.get('name') or model_meta.get('model_name', 'unknown')
+                    logger.success(f"Model {model_name} ready")
             
             self.statusBar().showMessage(f"Synced {len(models)} models from cloud", 5000)
         except Exception as e:

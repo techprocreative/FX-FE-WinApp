@@ -240,3 +240,66 @@ class SupabaseModelSync:
         except Exception as e:
             logger.error(f"Failed to send heartbeat: {e}")
             return False
+    
+    # ==================== Trade Logging ====================
+    
+    async def log_trade(
+        self,
+        symbol: str,
+        trade_type: str,  # 'buy' or 'sell'
+        volume: float,
+        open_price: float,
+        ticket: int,
+        is_auto_trade: bool = True,
+        model_id: str = None
+    ) -> bool:
+        """Log a trade to Supabase for dashboard visibility"""
+        try:
+            # Get connection ID
+            connection = (self.client.table('mt5_connections')
+                .select('id')
+                .eq('user_id', self.user_id)
+                .limit(1)
+                .execute())
+            
+            connection_id = connection.data[0]['id'] if connection.data else None
+            
+            trade_data = {
+                'user_id': self.user_id,
+                'connection_id': connection_id,
+                'symbol': symbol,
+                'trade_type': trade_type,
+                'volume': volume,
+                'open_price': open_price,
+                'ticket': str(ticket),
+                'is_auto_trade': is_auto_trade,
+                'model_id': model_id,
+                'open_time': datetime.now().isoformat()
+            }
+            
+            self.client.table('trades').insert(trade_data).execute()
+            logger.info(f"Trade logged to Supabase: {trade_type} {volume} {symbol} @ {open_price}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to log trade: {e}")
+            return False
+    
+    async def update_trade_close(
+        self,
+        ticket: int,
+        close_price: float,
+        profit: float
+    ) -> bool:
+        """Update trade with close information"""
+        try:
+            self.client.table('trades').update({
+                'close_price': close_price,
+                'close_time': datetime.now().isoformat(),
+                'profit': profit
+            }).eq('ticket', str(ticket)).eq('user_id', self.user_id).execute()
+            logger.info(f"Trade {ticket} closed: profit={profit}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update trade close: {e}")
+            return False
