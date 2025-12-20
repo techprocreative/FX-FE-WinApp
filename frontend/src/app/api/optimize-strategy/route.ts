@@ -11,10 +11,11 @@ function getSupabaseClient() {
 }
 
 // Helper to get OpenAI client (lazy initialization)
+// Supports any OpenAI-compatible API (OpenRouter, Azure OpenAI, etc.)
 function getOpenAIClient() {
     return new OpenAI({
-        apiKey: process.env.OPENROUTER_API_KEY,
-        baseURL: 'https://openrouter.ai/api/v1',
+        apiKey: process.env.LLM_API_KEY || process.env.OPENROUTER_API_KEY,
+        baseURL: process.env.LLM_BASE_URL || 'https://openrouter.ai/api/v1',
     });
 }
 
@@ -166,8 +167,10 @@ Generate optimal training configuration.`;
 
         // Call LLM
         const openai = getOpenAIClient();
+        const model = process.env.LLM_MODEL || 'anthropic/claude-3.5-sonnet';
+
         const completion = await openai.chat.completions.create({
-            model: 'anthropic/claude-3.5-sonnet',
+            model,
             messages: [
                 { role: 'system', content: STRATEGY_OPTIMIZER_PROMPT },
                 { role: 'user', content: userPrompt }
@@ -202,8 +205,8 @@ Generate optimal training configuration.`;
         // Log usage to Supabase
         await supabase.from('llm_logs').insert({
             user_id,
-            provider: 'openrouter',
-            model: 'claude-3.5-sonnet',
+            provider: process.env.LLM_PROVIDER || 'openrouter',
+            model: model,
             prompt_tokens: promptTokens,
             completion_tokens: completionTokens,
             total_cost: totalCost,
