@@ -99,6 +99,8 @@ class MainWindow(QMainWindow):
             asyncio.set_event_loop(loop)
             try:
                 loop.run_until_complete(self._fetch_and_sync_models())
+                # Refresh models page UI on main thread
+                QTimer.singleShot(0, self._refresh_models_page_ui)
             except Exception as e:
                 logger.error(f"Failed to fetch models on startup: {e}")
             finally:
@@ -528,6 +530,24 @@ class MainWindow(QMainWindow):
         
         return page
     
+    def _refresh_models_page_ui(self):
+        """Refresh the ML Models page UI with current models"""
+        try:
+            # Get the models page widget (index 2 in content_stack)
+            old_page = self.content_stack.widget(2)
+            if old_page:
+                # Remove old page
+                self.content_stack.removeWidget(old_page)
+                old_page.deleteLater()
+            
+            # Create new page with updated models
+            new_page = self._create_models_page()
+            self.content_stack.insertWidget(2, new_page)
+            
+            logger.info("Models page UI refreshed")
+        except Exception as e:
+            logger.error(f"Failed to refresh models page UI: {e}")
+    
     def _create_settings_page(self) -> QWidget:
         """Settings page with account, MT5, and logout"""
         page = QWidget()
@@ -675,6 +695,8 @@ class MainWindow(QMainWindow):
                 # Schedule UI update on main thread
                 timestamp = datetime.now().strftime("%H:%M:%S")
                 QTimer.singleShot(0, lambda: self.sync_status_label.setText(f"Last sync: {timestamp}"))
+                # Refresh models page UI
+                QTimer.singleShot(0, self._refresh_models_page_ui)
             except Exception as e:
                 logger.error(f"Sync failed: {e}")
                 QTimer.singleShot(0, lambda: self.sync_status_label.setText(f"Sync failed"))
