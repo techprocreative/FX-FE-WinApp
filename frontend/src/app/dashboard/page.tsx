@@ -5,15 +5,61 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
+interface MT5Connection {
+    id: string;
+    connection_name: string;
+    is_online: boolean;
+    mt5_login: string;
+    mt5_server: string;
+    last_heartbeat: string;
+}
+
+interface Trade {
+    id: string;
+    symbol: string;
+    trade_type: string;
+    volume: number;
+    open_price: number;
+    close_price: number | null;
+    open_time: string;
+    close_time: string | null;
+    profit: number | null;
+    is_auto_trade: boolean;
+}
+
+interface MLModel {
+    id: string;
+    name: string;
+    symbol: string;
+    win_rate: number;
+    is_active: boolean;
+    auto_trade_enabled: boolean;
+}
+
+interface Subscription {
+    tier: string;
+    status: string;
+    expires_at: string;
+}
+
 export default function DashboardPage() {
     const router = useRouter();
+    const supabase = createClient();
+
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
 
+    // Data states
+    const [mt5Connection, setMt5Connection] = useState<MT5Connection | null>(null);
+    const [trades, setTrades] = useState<Trade[]>([]);
+    const [mlModels, setMlModels] = useState<MLModel[]>([]);
+    const [subscription, setSubscription] = useState<Subscription | null>(null);
+    const [accountBalance, setAccountBalance] = useState(0);
+    const [todayPL, setTodayPL] = useState(0);
+
     useEffect(() => {
         const checkAuth = async () => {
-            const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
@@ -22,14 +68,86 @@ export default function DashboardPage() {
             }
 
             setUser(user);
+            await fetchDashboardData(user.id);
             setLoading(false);
         };
 
         checkAuth();
     }, [router]);
 
+    const fetchDashboardData = async (userId: string) => {
+        // Fetch MT5 connection
+        const { data: connections } = await supabase
+            .from('mt5_connections')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (connections && connections.length > 0) {
+            setMt5Connection(connections[0]);
+        }
+
+        // Fetch trades
+        const { data: tradesData } = await supabase
+            .from('trades')
+            .select('*')
+            .eq('user_id', userId)
+            .order('open_time', { ascending: false })
+            .limit(50);
+
+        if (tradesData) {
+            setTrades(tradesData);
+
+            // Calculate today's P/L
+            const today = new Date().toISOString().split('T')[0];
+            const todayTrades = tradesData.filter(t =>
+                t.close_time && t.close_time.startsWith(today)
+            );
+            const pl = todayTrades.reduce((sum, t) => sum + (t.profit || 0), 0);
+            setTodayPL(pl);
+        }
+
+        // Fetch ML models
+        const { data: modelsData } = await supabase
+            .from('ml_models')
+            .select('*')
+            .eq('user_id', userId);
+
+        if (modelsData) {
+            setMlModels(modelsData);
+        }
+
+        // Fetch subscription
+        const { data: subData } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .order('expires_at', { ascending: false })
+            .limit(1);
+
+        if (subData && subData.length > 0) {
+            setSubscription(subData[0]);
+        }
+
+        // Fetch profile for subscription tier
+        const { data: profileData } = await supabase
+            .from('profiles')
+            .select('subscription_tier')
+            .eq('id', userId)
+            .single();
+
+        if (profileData && !subscription) {
+            setSubscription({
+                tier: profileData.subscription_tier || 'free',
+                status: 'active',
+                expires_at: ''
+            });
+        }
+    };
+
     const handleLogout = async () => {
-        const supabase = createClient();
         await supabase.auth.signOut();
         router.push('/');
     };
@@ -52,6 +170,10 @@ export default function DashboardPage() {
             </div>
         );
     }
+
+    const activeModelsCount = mlModels.filter(m => m.is_active).length;
+    const mt5Status = mt5Connection?.is_online ? 'Connected' : 'Disconnected';
+    const mt5StatusColor = mt5Connection?.is_online ? '#10b981' : '#94a3b8';
 
     return (
         <div style={{
@@ -198,10 +320,10 @@ export default function DashboardPage() {
                             marginBottom: '2rem'
                         }}>
                             {[
-                                { label: 'MT5 Status', value: 'Disconnected', color: '#94a3b8', icon: '🔌' },
-                                { label: 'Account Balance', value: '$0.00', color: '#06b6d4', icon: '💰' },
-                                { label: 'Active Models', value: '0', color: '#10b981', icon: '🤖' },
-                                { label: 'Today P/L', value: '$0.00', color: '#94a3b8', icon: '📊' }
+                                { label: 'MT5 Status', value: mt5Status, color: mt5StatusColor, icon: '🔌' },
+                                { label: 'Account Balance', value: `$${accountBalance.toFixed(2)}`, color: '#06b6d4', icon: '💰' },
+                                { label: 'Active Models', value: activeModelsCount.toString(), color: '#10b981', icon: '🤖' },
+                                { label: 'Today P/L', value: `$${todayPL.toFixed(2)}`, color: todayPL >= 0 ? '#10b981' : '#f43f5e', icon: '📊' }
                             ].map((stat, idx) => (
                                 <div key={idx} style={{
                                     background: 'rgba(30, 41, 59, 0.6)',
@@ -233,33 +355,46 @@ export default function DashboardPage() {
                             <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '1rem' }}>
                                 🔌 MT5 Connection
                             </h3>
-                            <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
-                                Connect your MetaTrader 5 account via the Windows connector application to start trading.
-                            </p>
-                            <div style={{
-                                padding: '1rem',
-                                background: 'rgba(251, 191, 36, 0.1)',
-                                border: '1px solid rgba(251, 191, 36, 0.3)',
-                                borderRadius: '0.75rem',
-                                color: '#fbbf24',
-                                fontSize: '0.875rem',
-                                marginBottom: '1.5rem'
-                            }}>
-                                ⚠️ Please download and run the Windows connector application to connect MT5
-                            </div>
-                            <button style={{
-                                padding: '0.875rem 1.5rem',
-                                background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
-                                border: 'none',
-                                borderRadius: '0.75rem',
-                                color: 'white',
-                                fontWeight: '700',
-                                cursor: 'pointer',
-                                fontSize: '0.9375rem',
-                                boxShadow: '0 4px 20px rgba(6, 182, 212, 0.3)'
-                            }}>
-                                Download Windows Connector
-                            </button>
+                            {mt5Connection ? (
+                                <div>
+                                    <p style={{ color: '#94a3b8', marginBottom: '0.5rem' }}>
+                                        <strong>Account:</strong> {mt5Connection.mt5_login} ({mt5Connection.mt5_server})
+                                    </p>
+                                    <p style={{ color: '#94a3b8', marginBottom: '1rem' }}>
+                                        <strong>Status:</strong> <span style={{ color: mt5StatusColor }}>{mt5Status}</span>
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
+                                        Connect your MetaTrader 5 account via the Windows connector application to start trading.
+                                    </p>
+                                    <div style={{
+                                        padding: '1rem',
+                                        background: 'rgba(251, 191, 36, 0.1)',
+                                        border: '1px solid rgba(251, 191, 36, 0.3)',
+                                        borderRadius: '0.75rem',
+                                        color: '#fbbf24',
+                                        fontSize: '0.875rem',
+                                        marginBottom: '1.5rem'
+                                    }}>
+                                        ⚠️ Please download and run the Windows connector application to connect MT5
+                                    </div>
+                                    <button style={{
+                                        padding: '0.875rem 1.5rem',
+                                        background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
+                                        border: 'none',
+                                        borderRadius: '0.75rem',
+                                        color: 'white',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9375rem',
+                                        boxShadow: '0 4px 20px rgba(6, 182, 212, 0.3)'
+                                    }}>
+                                        Download Windows Connector
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}
@@ -284,7 +419,10 @@ export default function DashboardPage() {
                             Auto-Trading Controls
                         </h3>
                         <p style={{ color: '#94a3b8', maxWidth: '500px' }}>
-                            Connect MT5 and load ML models to enable automated trading
+                            {mt5Connection ?
+                                `${activeModelsCount} model(s) active. Trading is ${activeModelsCount > 0 ? 'running' : 'stopped'}.` :
+                                'Connect MT5 and load ML models to enable automated trading'
+                            }
                         </p>
                     </div>
                 )}
@@ -292,57 +430,70 @@ export default function DashboardPage() {
                 {/* ML Models Tab */}
                 {activeTab === 'models' && (
                     <div>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                            gap: '1.5rem'
-                        }}>
-                            {[
-                                { name: 'XAUUSD Hybrid', winRate: '54.7%', status: 'Ready', color: '#10b981' },
-                                { name: 'BTCUSD Hybrid', winRate: '46.0%', status: 'Ready', color: '#10b981' },
-                                { name: 'XAUUSD EMA-CCI v2', winRate: '36.4%', status: 'Ready', color: '#10b981' },
-                                { name: 'BTCUSD EMA-CCI v2', winRate: '46.2%', status: 'Ready', color: '#10b981' }
-                            ].map((model, idx) => (
-                                <div key={idx} style={{
-                                    background: 'rgba(30, 41, 59, 0.6)',
-                                    borderRadius: '1.25rem',
-                                    border: '1px solid rgba(6, 182, 212, 0.2)',
-                                    padding: '1.5rem',
-                                    backdropFilter: 'blur(16px)'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                                        <h4 style={{ fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>{model.name}</h4>
-                                        <span style={{
-                                            padding: '0.25rem 0.75rem',
-                                            background: `rgba(16, 185, 129, 0.15)`,
-                                            border: `1px solid rgba(16, 185, 129, 0.3)`,
-                                            borderRadius: '1rem',
-                                            fontSize: '0.75rem',
-                                            color: model.color,
-                                            fontWeight: '600'
-                                        }}>
-                                            {model.status}
-                                        </span>
-                                    </div>
-                                    <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '1rem' }}>
-                                        Win Rate: <span style={{ color: '#06b6d4', fontWeight: '600' }}>{model.winRate}</span>
-                                    </p>
-                                    <button style={{
-                                        width: '100%',
-                                        padding: '0.75rem',
-                                        background: 'rgba(6, 182, 212, 0.1)',
-                                        border: '1px solid rgba(6, 182, 212, 0.3)',
-                                        borderRadius: '0.75rem',
-                                        color: '#06b6d4',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        fontSize: '0.875rem'
+                        {mlModels.length > 0 ? (
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                                gap: '1.5rem'
+                            }}>
+                                {mlModels.map((model) => (
+                                    <div key={model.id} style={{
+                                        background: 'rgba(30, 41, 59, 0.6)',
+                                        borderRadius: '1.25rem',
+                                        border: '1px solid rgba(6, 182, 212, 0.2)',
+                                        padding: '1.5rem',
+                                        backdropFilter: 'blur(16px)'
                                     }}>
-                                        Load Model
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                                            <h4 style={{ fontSize: '1.125rem', fontWeight: '700', margin: 0 }}>{model.name}</h4>
+                                            <span style={{
+                                                padding: '0.25rem 0.75rem',
+                                                background: model.is_active ? 'rgba(16, 185, 129, 0.15)' : 'rgba(148, 163, 184, 0.15)',
+                                                border: model.is_active ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(148, 163, 184, 0.3)',
+                                                borderRadius: '1rem',
+                                                fontSize: '0.75rem',
+                                                color: model.is_active ? '#10b981' : '#94a3b8',
+                                                fontWeight: '600'
+                                            }}>
+                                                {model.is_active ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </div>
+                                        <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                                            Symbol: <span style={{ color: '#06b6d4', fontWeight: '600' }}>{model.symbol}</span>
+                                        </p>
+                                        <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                                            Win Rate: <span style={{ color: '#06b6d4', fontWeight: '600' }}>{model.win_rate?.toFixed(1)}%</span>
+                                        </p>
+                                        <button style={{
+                                            width: '100%',
+                                            padding: '0.75rem',
+                                            background: 'rgba(6, 182, 212, 0.1)',
+                                            border: '1px solid rgba(6, 182, 212, 0.3)',
+                                            borderRadius: '0.75rem',
+                                            color: '#06b6d4',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            fontSize: '0.875rem'
+                                        }}>
+                                            {model.is_active ? 'Stop Model' : 'Start Model'}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{
+                                background: 'rgba(30, 41, 59, 0.6)',
+                                borderRadius: '1.25rem',
+                                border: '1px solid rgba(6, 182, 212, 0.2)',
+                                padding: '3rem',
+                                backdropFilter: 'blur(16px)',
+                                textAlign: 'center'
+                            }}>
+                                <p style={{ color: '#94a3b8' }}>
+                                    No ML models found. Models will appear here once loaded via the Windows connector.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -355,9 +506,49 @@ export default function DashboardPage() {
                         padding: '2rem',
                         backdropFilter: 'blur(16px)'
                     }}>
-                        <p style={{ textAlign: 'center', color: '#94a3b8', padding: '3rem' }}>
-                            No trades yet. Start auto-trading to see your trade history here.
-                        </p>
+                        {trades.length > 0 ? (
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid rgba(6, 182, 212, 0.2)' }}>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.875rem' }}>Symbol</th>
+                                            <th style={{ padding: '1rem', textAlign: 'left', color: '#94a3b8', fontSize: '0.875rem' }}>Type</th>
+                                            <th style={{ padding: '1rem', textAlign: 'right', color: '#94a3b8', fontSize: '0.875rem' }}>Volume</th>
+                                            <th style={{ padding: '1rem', textAlign: 'right', color: '#94a3b8', fontSize: '0.875rem' }}>Entry</th>
+                                            <th style={{ padding: '1rem', textAlign: 'right', color: '#94a3b8', fontSize: '0.875rem' }}>Exit</th>
+                                            <th style={{ padding: '1rem', textAlign: 'right', color: '#94a3b8', fontSize: '0.875rem' }}>P/L</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {trades.slice(0, 20).map((trade) => (
+                                            <tr key={trade.id} style={{ borderBottom: '1px solid rgba(6, 182, 212, 0.1)' }}>
+                                                <td style={{ padding: '1rem', color: 'white' }}>{trade.symbol}</td>
+                                                <td style={{ padding: '1rem', color: trade.trade_type === 'buy' ? '#10b981' : '#f43f5e', textTransform: 'uppercase' }}>
+                                                    {trade.trade_type}
+                                                </td>
+                                                <td style={{ padding: '1rem', textAlign: 'right', color: 'white' }}>{trade.volume}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'right', color: 'white' }}>{trade.open_price.toFixed(5)}</td>
+                                                <td style={{ padding: '1rem', textAlign: 'right', color: 'white' }}>
+                                                    {trade.close_price ? trade.close_price.toFixed(5) : '-'}
+                                                </td>
+                                                <td style={{
+                                                    padding: '1rem',
+                                                    textAlign: 'right',
+                                                    color: (trade.profit || 0) >= 0 ? '#10b981' : '#f43f5e',
+                                                    fontWeight: '600'
+                                                }}>
+                                                    ${(trade.profit || 0).toFixed(2)}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p style={{ textAlign: 'center', color: '#94a3b8', padding: '3rem' }}>
+                                No trades yet. Start auto-trading to see your trade history here.
+                            </p>
+                        )}
                     </div>
                 )}
 
@@ -405,9 +596,10 @@ export default function DashboardPage() {
                                     borderRadius: '0.75rem',
                                     color: '#06b6d4',
                                     fontSize: '1rem',
-                                    fontWeight: '600'
+                                    fontWeight: '600',
+                                    textTransform: 'capitalize'
                                 }}>
-                                    Free Tier
+                                    {subscription?.tier || 'Free'} Tier
                                 </div>
                             </div>
                             <Link href="/" style={{
