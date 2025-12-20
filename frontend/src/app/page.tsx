@@ -1,87 +1,146 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HomePage() {
     return (
-        <main className="min-h-screen bg-dark">
-            {/* Hero Section */}
-            <section className="relative overflow-hidden">
-                {/* Background gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-dark via-dark-50 to-dark-100 opacity-80" />
+        <main className="min-h-screen bg-[#0f172a] selection:bg-indigo-500 selection:text-white">
 
-                {/* Content */}
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-                    <div className="text-center">
-                        {/* Logo */}
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6">
-                            <span className="text-gradient">NexusTrade</span>
-                        </h1>
-
-                        <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-3xl mx-auto">
-                            Platform Trading Forex dengan AI Strategy Generator dan ML Auto-Trading
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link
-                                href="/auth/signup"
-                                className="px-8 py-4 bg-primary rounded-lg font-semibold text-white hover:bg-primary-600 transition-colors"
-                            >
+            {/* Navbar */}
+            <nav className="fixed top-0 w-full z-50 glass border-b border-white/5">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16">
+                        <div className="flex-shrink-0">
+                            <span className="text-2xl font-bold text-gradient">NexusTrade</span>
+                        </div>
+                        <div className="hidden md:block">
+                            <div className="ml-10 flex items-baseline space-x-8">
+                                <a href="#features" className="text-gray-300 hover:text-white transition-colors duration-300">Fitur</a>
+                                <a href="#pricing" className="text-gray-300 hover:text-white transition-colors duration-300">Harga</a>
+                                <a href="#stats" className="text-gray-300 hover:text-white transition-colors duration-300">Statistik</a>
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                            <Link href="/auth/login" className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                                Log in
+                            </Link>
+                            <Link href="/auth/signup" className="px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all shadow-lg shadow-indigo-500/20">
                                 Mulai Gratis
                             </Link>
-                            <Link
-                                href="/auth/login"
-                                className="px-8 py-4 bg-dark-50 border border-dark-100 rounded-lg font-semibold text-white hover:bg-dark-100 transition-colors"
-                            >
-                                Login
-                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            {/* Hero Section */}
+            <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+                {/* Animated Background Blobs */}
+                <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+                <div className="absolute top-0 -right-4 w-96 h-96 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+                <div className="absolute -bottom-8 left-20 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 text-indigo-300 text-sm font-medium mb-8 backdrop-blur-sm animate-float">
+                        <span className="flex w-2 h-2 bg-indigo-500 rounded-full mr-2 animate-pulse"></span>
+                        New: GRU-XGBoost Hybrid Model Live!
+                    </div>
+
+                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-8">
+                        Trading Forex dengan <br />
+                        <span className="text-gradient">Kecerdasan Buatan</span>
+                    </h1>
+
+                    <p className="mt-4 max-w-2xl text-xl text-slate-400 mb-10 leading-relaxed">
+                        Platform auto-trading revolusioner yang menggabungkan analisis teknikal klasik dengan Machine Learning canggih untuk profitabilitas maksimal.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-5 w-full justify-center">
+                        <Link href="/auth/signup"
+                            className="px-8 py-4 bg-white text-slate-900 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all transform hover:scale-105 shadow-xl shadow-white/10">
+                            Coba Demo Gratis
+                        </Link>
+                        <Link href="#features"
+                            className="px-8 py-4 glass text-white rounded-xl font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-md border border-white/10">
+                            Pelajari Cara Kerja
+                        </Link>
+                    </div>
+
+                    {/* Dashboard Preview Overlay */}
+                    <div className="mt-20 relative w-full max-w-5xl group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                        <div className="relative glass rounded-xl border border-white/10 p-4 aspect-video flex items-center justify-center overflow-hidden">
+                            <div className="text-center">
+                                <span className="text-6xl mb-4 block">📊</span>
+                                <h3 className="text-2xl font-bold text-white mb-2">Interactive Trading Dashboard</h3>
+                                <p className="text-slate-400">Real-time charts, AI signals, and portfolio tracking</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Stats Section */}
+            <section id="stats" className="py-12 border-y border-white/5 bg-slate-900/50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                        <div>
+                            <div className="text-4xl font-bold text-white mb-2">$1B+</div>
+                            <div className="text-sm text-slate-400 uppercase tracking-wider">Trading Volume</div>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-white mb-2">50k+</div>
+                            <div className="text-sm text-slate-400 uppercase tracking-wider">Active Traders</div>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-white mb-2">99.9%</div>
+                            <div className="text-sm text-slate-400 uppercase tracking-wider">Uptime</div>
+                        </div>
+                        <div>
+                            <div className="text-4xl font-bold text-white mb-2">24/7</div>
+                            <div className="text-sm text-slate-400 uppercase tracking-wider">AI Analysis</div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Features Section */}
-            <section className="py-20 bg-dark-50">
+            <section id="features" className="py-32 relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold text-center mb-12">
-                        Fitur <span className="text-primary">Unggulan</span>
-                    </h2>
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6">Fitur <span className="text-indigo-500">Unggulan</span></h2>
+                        <p className="text-xl text-slate-400 max-w-2xl mx-auto">Teknologi trading paling mutakhir di ujung jari Anda.</p>
+                    </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="p-6 bg-dark rounded-xl border border-dark-100 hover:border-primary transition-colors">
-                            <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-4">
-                                <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                </svg>
+                        <div className="glass-card p-8 rounded-3xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-indigo-500/20"></div>
+                            <div className="w-14 h-14 bg-indigo-500/20 rounded-2xl flex items-center justify-center mb-6 text-2xl">
+                                🧠
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">AI Strategy Generator</h3>
-                            <p className="text-gray-400">
-                                Generate strategi trading menggunakan AI dengan prompt natural language
+                            <h3 className="text-2xl font-bold mb-4">AI Strategy Generator</h3>
+                            <p className="text-slate-400 leading-relaxed">
+                                Cukup ketik strategi dalam bahasa manusia, AI kami akan menerjemahkannya menjadi kode algoritma siap pakai.
                             </p>
                         </div>
 
-                        {/* Feature 2 */}
-                        <div className="p-6 bg-dark rounded-xl border border-dark-100 hover:border-primary transition-colors">
-                            <div className="w-12 h-12 bg-accent-green/20 rounded-lg flex items-center justify-center mb-4">
-                                <svg className="w-6 h-6 text-accent-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                </svg>
+                        <div className="glass-card p-8 rounded-3xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-pink-500/20"></div>
+                            <div className="w-14 h-14 bg-pink-500/20 rounded-2xl flex items-center justify-center mb-6 text-2xl">
+                                🤖
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">ML Auto-Trading</h3>
-                            <p className="text-gray-400">
-                                Trading otomatis dengan model Machine Learning yang terenkripsi dan aman
+                            <h3 className="text-2xl font-bold mb-4">ML Auto-Trading</h3>
+                            <p className="text-slate-400 leading-relaxed">
+                                Model GRU-XGBoost Hybrid yang terus belajar dari pasar untuk memberikan sinyal entry/exit dengan probabilitas tinggi.
                             </p>
                         </div>
 
-                        {/* Feature 3 */}
-                        <div className="p-6 bg-dark rounded-xl border border-dark-100 hover:border-primary transition-colors">
-                            <div className="w-12 h-12 bg-accent-yellow/20 rounded-lg flex items-center justify-center mb-4">
-                                <svg className="w-6 h-6 text-accent-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
+                        <div className="glass-card p-8 rounded-3xl relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-bl-full -mr-8 -mt-8 transition-all group-hover:bg-purple-500/20"></div>
+                            <div className="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 text-2xl">
+                                ⚡
                             </div>
-                            <h3 className="text-xl font-semibold mb-2">Backtesting</h3>
-                            <p className="text-gray-400">
-                                Test strategi trading pada data historis sebelum trading dengan uang nyata
+                            <h3 className="text-2xl font-bold mb-4">Lightning Backtest</h3>
+                            <p className="text-slate-400 leading-relaxed">
+                                Uji strategi Anda pada data historis 5 tahun terakhir dalam hitungan detik. Validasi sebelum meresikokan modal.
                             </p>
                         </div>
                     </div>
@@ -89,78 +148,60 @@ export default function HomePage() {
             </section>
 
             {/* Pricing Section */}
-            <section className="py-20">
+            <section id="pricing" className="py-32 relative bg-slate-900/50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-3xl font-bold text-center mb-12">
-                        Pilih <span className="text-primary">Paket</span>
-                    </h2>
+                    <div className="text-center mb-20">
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6">Investasi <span className="text-indigo-500">Cerdas</span></h2>
+                        <p className="text-xl text-slate-400">Pilih paket yang sesuai dengan perjalanan trading Anda.</p>
+                    </div>
 
-                    <div className="grid md:grid-cols-4 gap-6">
-                        {/* Free */}
-                        <div className="p-6 bg-dark-50 rounded-xl border border-dark-100">
-                            <h3 className="text-lg font-semibold mb-2">Free</h3>
-                            <p className="text-3xl font-bold mb-4">Rp 0</p>
-                            <ul className="space-y-2 text-sm text-gray-400 mb-6">
-                                <li>✓ Trading Manual</li>
-                                <li>✓ History 30 hari</li>
-                                <li>✓ 1 API Key</li>
-                                <li>✓ 10 LLM request/hari</li>
-                            </ul>
-                            <Link href="/auth/signup" className="block text-center py-2 border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition-colors">
-                                Daftar Gratis
-                            </Link>
-                        </div>
-
+                    <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                         {/* Basic */}
-                        <div className="p-6 bg-dark-50 rounded-xl border border-dark-100">
-                            <h3 className="text-lg font-semibold mb-2">Basic</h3>
-                            <p className="text-3xl font-bold mb-4">Rp 449K<span className="text-sm font-normal">/bln</span></p>
-                            <ul className="space-y-2 text-sm text-gray-400 mb-6">
-                                <li>✓ Semua fitur Free</li>
-                                <li>✓ History 1 tahun</li>
-                                <li>✓ 3 API Keys</li>
-                                <li>✓ 100 LLM request/hari</li>
-                                <li>✓ 10 Backtest/hari</li>
+                        <div className="glass p-8 rounded-3xl border border-white/5 flex flex-col">
+                            <h3 className="text-xl font-semibold mb-2 text-slate-300">Starter</h3>
+                            <div className="text-4xl font-bold mb-6">Gratis<span className="text-lg font-normal text-slate-500">/selamanya</span></div>
+                            <ul className="space-y-4 mb-8 flex-1 text-slate-400">
+                                <li className="flex items-center">✓ Manual Trading</li>
+                                <li className="flex items-center">✓ Basic Charts</li>
+                                <li className="flex items-center">✓ 1 Active Strategy</li>
                             </ul>
-                            <Link href="/auth/signup" className="block text-center py-2 bg-dark-100 rounded-lg hover:bg-primary transition-colors">
-                                Pilih Basic
+                            <Link href="/auth/signup" className="w-full py-4 rounded-xl border border-white/10 hover:bg-white/5 text-center transition-colors font-semibold">
+                                Mulai Sekarang
                             </Link>
                         </div>
 
-                        {/* Pro - Recommended */}
-                        <div className="p-6 bg-gradient-to-b from-primary/20 to-dark-50 rounded-xl border-2 border-primary relative">
-                            <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-primary text-xs font-semibold rounded-full">
-                                POPULER
-                            </span>
-                            <h3 className="text-lg font-semibold mb-2">Pro</h3>
-                            <p className="text-3xl font-bold mb-4">Rp 1.2JT<span className="text-sm font-normal">/bln</span></p>
-                            <ul className="space-y-2 text-sm text-gray-400 mb-6">
-                                <li>✓ Semua fitur Basic</li>
-                                <li>✓ History Unlimited</li>
-                                <li>✓ 10 API Keys</li>
-                                <li>✓ 500 LLM request/hari</li>
-                                <li>✓ 50 Backtest/hari</li>
-                                <li>✓ Auto-Trading 5 Model</li>
-                            </ul>
-                            <Link href="/auth/signup" className="block text-center py-2 bg-primary rounded-lg hover:bg-primary-600 transition-colors">
-                                Pilih Pro
-                            </Link>
+                        {/* Pro */}
+                        <div className="p-1 rounded-3xl bg-gradient-to-b from-indigo-500 to-purple-500 relative transform md:-translate-y-4">
+                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg">
+                                POPULAR CHOICE
+                            </div>
+                            <div className="bg-[#0f172a] p-8 rounded-[22px] h-full flex flex-col">
+                                <h3 className="text-xl font-semibold mb-2 text-indigo-400">Pro Trader</h3>
+                                <div className="text-4xl font-bold mb-6">$29<span className="text-lg font-normal text-slate-500">/bulan</span></div>
+                                <ul className="space-y-4 mb-8 flex-1 text-slate-300">
+                                    <li className="flex items-center text-white">✓ AI Strategy Generator</li>
+                                    <li className="flex items-center text-white">✓ ML Auto-Trading (5 models)</li>
+                                    <li className="flex items-center text-white">✓ Unlimited Backtesting</li>
+                                    <li className="flex items-center text-white">✓ Priority Support</li>
+                                </ul>
+                                <Link href="/auth/signup" className="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-center transition-colors font-bold shadow-lg shadow-indigo-500/25">
+                                    Get Pro Access
+                                </Link>
+                            </div>
                         </div>
 
                         {/* Enterprise */}
-                        <div className="p-6 bg-dark-50 rounded-xl border border-dark-100">
-                            <h3 className="text-lg font-semibold mb-2">Enterprise</h3>
-                            <p className="text-3xl font-bold mb-4">Rp 3JT<span className="text-sm font-normal">/bln</span></p>
-                            <ul className="space-y-2 text-sm text-gray-400 mb-6">
-                                <li>✓ Semua fitur Pro</li>
-                                <li>✓ Unlimited API Keys</li>
-                                <li>✓ Unlimited LLM</li>
-                                <li>✓ Unlimited Backtest</li>
-                                <li>✓ Unlimited Auto-Trading</li>
-                                <li>✓ Support Dedicated</li>
+                        <div className="glass p-8 rounded-3xl border border-white/5 flex flex-col">
+                            <h3 className="text-xl font-semibold mb-2 text-slate-300">Institutional</h3>
+                            <div className="text-4xl font-bold mb-6">$99<span className="text-lg font-normal text-slate-500">/bulan</span></div>
+                            <ul className="space-y-4 mb-8 flex-1 text-slate-400">
+                                <li className="flex items-center">✓ Custom ML Models</li>
+                                <li className="flex items-center">✓ Dedicated Server</li>
+                                <li className="flex items-center">✓ API Access</li>
+                                <li className="flex items-center">✓ 24/7 Account Manager</li>
                             </ul>
-                            <Link href="/auth/signup" className="block text-center py-2 bg-dark-100 rounded-lg hover:bg-primary transition-colors">
-                                Hubungi Kami
+                            <Link href="/auth/signup" className="w-full py-4 rounded-xl border border-white/10 hover:bg-white/5 text-center transition-colors font-semibold">
+                                Contact Sales
                             </Link>
                         </div>
                     </div>
@@ -168,9 +209,36 @@ export default function HomePage() {
             </section>
 
             {/* Footer */}
-            <footer className="py-8 border-t border-dark-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
-                    <p>&copy; 2024 NexusTrade. All rights reserved.</p>
+            <footer className="py-12 border-t border-white/5 bg-slate-950">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid md:grid-cols-4 gap-12 mb-12">
+                        <div className="col-span-2">
+                            <span className="text-2xl font-bold text-gradient mb-6 block">NexusTrade</span>
+                            <p className="text-slate-400 max-w-sm">
+                                Membawa kecerdasan buatan ke dunia trading ritel. Aman, transparan, dan terbukti secara matematis.
+                            </p>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-6 text-white">Platform</h4>
+                            <ul className="space-y-4 text-slate-400">
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">Features</a></li>
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">Pricing</a></li>
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">API</a></li>
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">Status</a></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 className="font-bold mb-6 text-white">Legal</h4>
+                            <ul className="space-y-4 text-slate-400">
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">Privacy Policy</a></li>
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">Terms of Service</a></li>
+                                <li><a href="#" className="hover:text-indigo-400 transition-colors">Risk Disclaimer</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div className="pt-8 border-t border-white/5 text-center text-slate-500 text-sm">
+                        &copy; 2024 NexusTrade Financial Technologies. All rights reserved.
+                    </div>
                 </div>
             </footer>
         </main>
