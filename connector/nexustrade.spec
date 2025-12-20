@@ -1,7 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
 NexusTrade Windows Connector - PyInstaller Spec File
-Build command: pyinstaller nexustrade.spec
+Build command: pyinstaller nexustrade.spec --clean --noconfirm
+
+PyInstaller auto-detects Python imports from main.py.
+Only non-Python assets need to be specified in datas.
 """
 
 import sys
@@ -16,17 +19,11 @@ a = Analysis(
     ['main.py'],
     pathex=[str(project_root)],
     binaries=[],
+    # Only include non-Python assets here
+    # Python modules are auto-detected via imports
     datas=[
-        # Include essential modules
-        ('core/*.py', 'core'),
-        ('api/*.py', 'api'),
-        ('security/*.py', 'security'),
-        ('trading/*.py', 'trading'),
-        ('ui/*.py', 'ui'),
-        # Include only model_trainer (needed for demo training)
-        # Other ai/*.py scripts are standalone training scripts for development
-        ('ai/__init__.py', 'ai'),
-        ('ai/model_trainer.py', 'ai'),
+        # Assets (icons, etc) - add if they exist
+        # ('assets', 'assets'),
     ],
     hiddenimports=[
         # PyQt6
@@ -34,7 +31,7 @@ a = Analysis(
         'PyQt6.QtGui',
         'PyQt6.QtWidgets',
         'PyQt6.sip',
-        # FastAPI
+        # FastAPI & uvicorn
         'fastapi',
         'uvicorn',
         'uvicorn.logging',
@@ -44,27 +41,63 @@ a = Analysis(
         'uvicorn.lifespan',
         'uvicorn.lifespan.on',
         'pydantic',
-        # ML (XGBoost only - TensorFlow removed for faster startup)
+        'pydantic_core',
+        'pydantic._internal._core_utils',
+        # ML libraries
         'sklearn',
         'sklearn.ensemble',
+        'sklearn.ensemble._forest',
         'sklearn.preprocessing',
+        'sklearn.model_selection',
+        'sklearn.metrics',
         'xgboost',
         'numpy',
         'pandas',
         'joblib',
-        # Supabase
+        # Supabase & HTTP
         'supabase',
+        'supabase._sync_client',
+        'supabase._async_client',
+        'gotrue',
+        'gotrue._sync_client',
+        'gotrue._async_client',
+        'postgrest',
+        'storage3',
+        'realtime',
         'httpx',
-        # OpenAI (for LLM integration)
+        'httpcore',
+        # OpenAI
         'openai',
         'openai.types',
         # Crypto
         'cryptography',
         'cryptography.fernet',
+        'cryptography.hazmat.primitives',
+        'cryptography.hazmat.primitives.kdf.pbkdf2',
+        'cryptography.hazmat.backends',
         # MT5
         'MetaTrader5',
         # Logging
         'loguru',
+        # Our custom modules (explicit to ensure they're included)
+        'core',
+        'core.config',
+        'core.mt5_client', 
+        'core.supabase_sync',
+        'api',
+        'api.server',
+        'api.subscription_checker',
+        'api.llm_router',
+        'security',
+        'security.model_security',
+        'trading',
+        'trading.auto_trader',
+        'ui',
+        'ui.login_window',
+        'ui.main_window',
+        'ui.strategy_builder',
+        'ai',
+        'ai.model_trainer',
     ],
     hookspath=[],
     hooksconfig={},
@@ -84,6 +117,7 @@ a = Analysis(
         'notebook',
         'pytest',
         'sphinx',
+        'setuptools',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -107,7 +141,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # No console window
+    console=False,  # No console window (GUI app)
     disable_windowed_traceback=False,
     target_arch=None,
     codesign_identity=None,
