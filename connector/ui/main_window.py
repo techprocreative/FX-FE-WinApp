@@ -23,6 +23,7 @@ from security.model_security import ModelSecurity
 from trading.auto_trader import AutoTrader, Signal, TradingConfig
 from api.server import set_mt5_client
 from ui.strategy_builder import StrategyBuilderTab
+from loguru import logger
 
 
 class AutoTraderThread(QThread):
