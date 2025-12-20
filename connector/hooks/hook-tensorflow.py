@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Custom hook to completely exclude TensorFlow/Keras
+Hook for TensorFlow - marks as excluded
 This overrides the default pyinstaller-hooks-contrib hook
 """
 
-# Empty hook - do nothing
-# This prevents the default TensorFlow hook from running
-
-def pre_safe_import_module(api):
-    """Do nothing - we explicitly exclude TensorFlow"""
-    pass
+# Empty hook - TensorFlow is explicitly excluded from build
+hiddenimports = []
+excludedimports = ['tensorflow', 'keras']
+datas = []
+binaries = []

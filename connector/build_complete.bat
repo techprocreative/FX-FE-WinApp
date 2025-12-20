@@ -36,12 +36,8 @@ if exist "%HOOKS_DIR%\hook-tensorflow.py" (
     if not exist "%HOOKS_DIR%\hook-tensorflow.py.bak" (
         copy "%HOOKS_DIR%\hook-tensorflow.py" "%HOOKS_DIR%\hook-tensorflow.py.bak" >nul
     )
-    REM Replace with empty hook
-    (
-        echo # Disabled TensorFlow hook - tensorflow is excluded from build
-        echo def pre_safe_import_module^(api^):
-        echo     pass
-    ^) > "%HOOKS_DIR%\hook-tensorflow.py"
+    REM Replace with empty hook using Python for reliability
+    python -c "open(r'%HOOKS_DIR%\hook-tensorflow.py', 'w').write('# Disabled TensorFlow hook\ndef pre_safe_import_module(api):\n    pass\n')"
     echo       TensorFlow hook disabled.
 ) else (
     echo       TensorFlow hook not found (OK).
@@ -61,12 +57,8 @@ echo [5/7] Setting up custom hooks...
 if not exist "hooks" mkdir hooks
 if not exist "hooks\pre_safe_import_module" mkdir hooks\pre_safe_import_module
 
-REM Create empty tensorflow hook in our custom hooks
-(
-    echo # Empty TensorFlow hook - tensorflow excluded from build
-    echo def pre_safe_import_module^(api^):
-    echo     pass
-^) > "hooks\pre_safe_import_module\hook-tensorflow.py"
+REM Create empty tensorflow hook using Python for reliability
+python -c "open(r'hooks\pre_safe_import_module\hook-tensorflow.py', 'w').write('# Disabled TensorFlow hook\ndef pre_safe_import_module(api):\n    pass\n')"
 echo       Done.
 
 REM Step 6: Build
