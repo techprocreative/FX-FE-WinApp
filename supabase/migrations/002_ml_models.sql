@@ -40,13 +40,19 @@ CREATE TABLE IF NOT EXISTS ml_models (
 );
 
 -- Create indexes for performance
-CREATE INDEX idx_ml_models_user_id ON ml_models(user_id);
-CREATE INDEX idx_ml_models_symbol ON ml_models(symbol);
-CREATE INDEX idx_ml_models_is_active ON ml_models(is_active);
-CREATE INDEX idx_ml_models_created_at ON ml_models(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ml_models_user_id ON ml_models(user_id);
+CREATE INDEX IF NOT EXISTS idx_ml_models_symbol ON ml_models(symbol);
+CREATE INDEX IF NOT EXISTS idx_ml_models_is_active ON ml_models(is_active);
+CREATE INDEX IF NOT EXISTS idx_ml_models_created_at ON ml_models(created_at DESC);
 
 -- Enable RLS
 ALTER TABLE ml_models ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own models" ON ml_models;
+DROP POLICY IF EXISTS "Users can insert their own models" ON ml_models;
+DROP POLICY IF EXISTS "Users can update their own models" ON ml_models;
+DROP POLICY IF EXISTS "Users can delete their own models" ON ml_models;
 
 -- RLS Policies
 CREATE POLICY "Users can view their own models"
@@ -73,6 +79,9 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Drop existing trigger if it exists
+DROP TRIGGER IF EXISTS ml_models_updated_at ON ml_models;
 
 -- Trigger for updated_at
 CREATE TRIGGER ml_models_updated_at
