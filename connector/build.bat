@@ -45,9 +45,9 @@ call venv\Scripts\activate.bat
 echo       Virtual environment activated
 
 REM Install dependencies
-echo [3/6] Installing dependencies...
-python -m pip install --upgrade pip -q
-python -m pip install -r requirements.txt -q
+echo [3/6] Installing dependencies (this may take a while)...
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 if errorlevel 1 (
     echo [ERROR] Failed to install dependencies
     goto :error
@@ -56,7 +56,7 @@ echo       Dependencies installed
 
 REM Install PyInstaller
 echo [4/6] Installing PyInstaller...
-python -m pip install pyinstaller -q
+python -m pip install pyinstaller
 if errorlevel 1 (
     echo [ERROR] Failed to install PyInstaller
     goto :error
