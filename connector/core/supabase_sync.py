@@ -16,13 +16,18 @@ from loguru import logger
 class SupabaseModelSync:
     """Handles ML model synchronization with Supabase"""
     
-    def __init__(self, supabase_url: str, supabase_key: str, user_id: str):
+    def __init__(self, supabase_url: str, supabase_key: str, user_id: str, access_token: str = None):
         self.client: Client = create_client(supabase_url, supabase_key)
         self.user_id = user_id
         self.bucket_name = 'ml-models'
         # Use proper user directory for models
         self.local_models_dir = Path.home() / '.nexustrade' / 'models'
         self.local_models_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Set auth token for RLS to work
+        if access_token:
+            self.client.auth.set_session(access_token, access_token)
+            logger.info("Supabase client authenticated with access token")
     
     async def fetch_user_models(self) -> List[Dict[str, Any]]:
         """Fetch all active models for the current user"""

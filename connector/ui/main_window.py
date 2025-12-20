@@ -71,12 +71,13 @@ class MainWindow(QMainWindow):
         self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
         self.trader_thread: Optional[AutoTraderThread] = None
         
-        # Supabase model sync
+        # Supabase model sync with authenticated client
         from core.supabase_sync import SupabaseModelSync
         self.supabase_sync = SupabaseModelSync(
             config.supabase.url,
             config.supabase.anon_key,
-            user_data['id']
+            user_data['id'],
+            access_token=user_data.get('access_token')
         )
         
         # UI references for updates
