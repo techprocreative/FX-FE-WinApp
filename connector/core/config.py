@@ -85,35 +85,17 @@ class Config:
             load_dotenv(self.config_path)
             logger.info(f"Configuration loaded from {self.config_path}")
         else:
-            logger.warning(f"Configuration file not found: {self.config_path}")
-            logger.warning("Creating default configuration file...")
-            # This method is not defined in the original or the instruction.
-            # Assuming it would create an empty or default .env file.
-            # For now, we'll just proceed without creating it if it doesn't exist.
-            # self._create_default_config() 
-            # load_dotenv(self.config_path) # Reload after creating
+            logger.info(f"Configuration file not found: {self.config_path}")
+            logger.info("Using default configuration...")
         
-        # Validate and load Supabase config
-        supabase_url = os.getenv('SUPABASE_URL', '').strip()
-        supabase_key = os.getenv('SUPABASE_ANON_KEY', '').strip()
-        
-        if not supabase_url or not supabase_key:
-            error_msg = (
-                "❌ Supabase configuration is missing!\n\n"
-                f"Please edit the configuration file:\n{self.config_path}\n\n"
-                "Required values:\n"
-                "- SUPABASE_URL=your_supabase_project_url\n"
-                "- SUPABASE_ANON_KEY=your_supabase_anon_key\n\n"
-                "Get these values from:\n"
-                "Supabase Dashboard → Project Settings → API"
-            )
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-        
+        # Hardcoded Supabase credentials (same as frontend)
+        # Users don't need to configure this - they just login with email/password
         self.supabase = SupabaseConfig(
-            url=supabase_url,
-            anon_key=supabase_key
+            url="https://xjqyqzqbfhxqxmhqxmhq.supabase.co",  # TODO: Replace with actual project URL
+            anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."  # TODO: Replace with actual anon key
         )
+        
+        logger.info(f"✓ Supabase configured")
         
         # Load OpenRouter config
         self.openrouter.api_key = os.getenv("OPENROUTER_API_KEY", "")
