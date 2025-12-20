@@ -5,70 +5,63 @@ Wrapper for train_gru_xgboost_hybrid.py with custom config support
 
 import asyncio
 from pathlib import Path
-from typing import Callable, Optional, Dict
+from typing import Callable, Optional, Dict, Any
 from loguru import logger
 
-from ai.train_gru_xgboost_hybrid import GRUXGBoostHybrid
+from ai.train_gru_xgboost_hybrid import train_model
 
 
 class CustomModelTrainer:
-    """
-    Wrapper for training custom models with LLM-generated configs
-    Supports progress callbacks for UI updates
-    """
+    """Trains custom ML models with progress callbacks and cloud sync"""
     
-    def __init__(self, config: dict, symbol: str, model_name: str, 
-                 progress_callback: Optional[Callable[[str, int], None]] = None):
-        """
-        Args:
-            config: LLM-generated training config
-            symbol: Trading symbol (BTCUSD, XAUUSD, etc.)
-            model_name: Custom model name
-            progress_callback: Callback(message, percent)
-        """
-        self.config = config
+    def __init__(
+        self,
+        symbol: str,
+        llm_config: dict,
+        model_name: Optional[str] = None,
+        progress_callback: Optional[Callable[[str, int], None]] = None,
+        supabase_sync: Optional[Any] = None  # SupabaseModelSync instance
+    ):
         self.symbol = symbol
-        self.model_name = model_name
-        self.progress_callback = progress_callback or (lambda m, p: None)
-        
-        self.trainer = GRUXGBoostHybrid()
-        self.result = None
+        self.llm_config = llm_config
+        self.model_name = model_name or f"{symbol}_custom_{llm_config.get('timeframe', 'M15')}"
+        self.progress_callback = progress_callback
+        self.supabase_sync = supabase_sync
     
     def _update_progress(self, message: str, percent: int):
-        """Update progress"""
+        """Update progress via callback"""
+        if self.progress_callback:
+            self.progress_callback(message, percent)
         logger.info(f"Training progress: {message} ({percent}%)")
-        self.progress_callback(message, percent)
     
-    async def train_async(self) -> dict:
-        """Train model asynchronously"""
+    async def train(self) -> Dict[str, Any]:
+        """Train the model with LLM configuration and sync to cloud"""
         try:
-            self._update_progress("Loading data...", 10)
+            self._update_progress("Initializing training...", 0)
             
-            # Load data
-            df = self.trainer.load_data(self.symbol)
+            # Extract config
+            timeframe = self.llm_config.get('timeframe', 'M15')
+            features = self.llm_config.get('features', [])
+            hyperparameters = self.llm_config.get('hyperparameters', {})
             
-            self._update_progress("Preparing features...", 20)
+            self._update_progress("Loading market data...", 10)
             
-            # Train model (this is synchronous, but we update progress)
-            self._update_progress("Training GRU model...", 30)
+            # Train model
+            self._update_progress("Training GRU-XGBoost hybrid model...", 30)
+            result = await asyncio.to_thread(
+                train_model,
+                symbol=self.symbol,
+                timeframe=timeframe,
+                features=features,
+                **hyperparameters
+            )
             
-            # Run training in thread pool to avoid blocking
-            loop = asyncio.get_event_loop()
-            result = await loop.run_in_executor(None, self.trainer.train, self.symbol)
+            self._update_progress("Model training complete!", 80)
             
-            self._update_progress("Training XGBoost meta-filter...", 60)
-            
-            # Training is complete at this point
-            self._update_progress("Evaluating model...", 80)
-            
-            # Save model
-            self._update_progress("Saving model...", 90)
-            model_id = self.trainer.save(result, self.symbol)
-            
-            self._update_progress("Syncing to Supabase...", 95)
-            
-            # TODO: Sync metadata to Supabase
-            # This will be implemented when we add model metadata sync
+            # Sync to Supabase if available
+            if self.supabase_sync:
+                self._update_progress("Syncing model to cloud...", 90)
+                await self._sync_to_supabase(result)
             
             self._update_progress("Training complete!", 100)
             

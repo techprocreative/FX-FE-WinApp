@@ -70,6 +70,14 @@ class MainWindow(QMainWindow):
         self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
         self.trader_thread: Optional[AutoTraderThread] = None
         
+        # Supabase model sync
+        from core.supabase_sync import SupabaseModelSync
+        self.supabase_sync = SupabaseModelSync(
+            config.supabase.url,
+            config.supabase.anon_key,
+            user_data['id']
+        )
+        
         # UI references for updates
         self.signal_labels: Dict[str, QLabel] = {}
         self.position_table: Optional[QTableWidget] = None
@@ -80,6 +88,10 @@ class MainWindow(QMainWindow):
         
         self._setup_ui()
         self._setup_timers()
+        
+        # Fetch models from Supabase after UI is ready
+        asyncio.create_task(self._fetch_and_sync_models())
+
     
     def _setup_ui(self):
         """Setup the main UI"""
@@ -214,7 +226,7 @@ class MainWindow(QMainWindow):
         self.content_stack.addWidget(self._create_models_page())
         
         # Strategy Builder
-        api_url = "https://your-app.vercel.app"  # TODO: Configure from settings
+        api_url = "https://fx.nusanexus.com"  # Production API URL
         self.strategy_builder = StrategyBuilderTab(api_url, self.user_data)
         self.strategy_builder.training_requested.connect(self._handle_training_request)
         self.content_stack.addWidget(self.strategy_builder)
@@ -804,6 +816,30 @@ class MainWindow(QMainWindow):
         else:
             event.ignore()
     
+    async def _fetch_and_sync_models(self):
+        """Fetch user's models from Supabase and download them"""
+        try:
+            logger.info("Fetching models from Supabase...")
+            models = await self.supabase_sync.fetch_user_models()
+            
+            if not models:
+                logger.info("No models found in Supabase")
+                return
+            
+            logger.info(f"Found {len(models)} models, downloading...")
+            
+            for model_meta in models:
+                # Download model file
+                local_path = await self.supabase_sync.download_model(model_meta)
+                
+                if local_path:
+                    logger.success(f"Model {model_meta['model_name']} ready")
+            
+            self.statusBar().showMessage(f"Synced {len(models)} models from cloud", 5000)
+        except Exception as e:
+            logger.error(f"Failed to fetch models: {e}")
+            self.statusBar().showMessage(f"Failed to sync models: {e}", 5000)
+    
     def _handle_training_request(self, config: dict, symbol: str, model_name: str):
         """Handle custom model training request from Strategy Builder"""
         logger.info(f"Training request: {model_name} for {symbol}")
@@ -811,27 +847,37 @@ class MainWindow(QMainWindow):
         # Import here to avoid circular dependency
         from ai.custom_trainer import CustomModelTrainer
         
-        # Create trainer with progress callback
+        # Create trainer with progress callback and Supabase sync
         def on_progress(message: str, percent: int):
             self.strategy_builder.update_progress(message, percent)
         
-        trainer = CustomModelTrainer(config, symbol, model_name, on_progress)
+        trainer = CustomModelTrainer(
+            symbol=symbol,
+            llm_config=config,
+            model_name=model_name,
+            progress_callback=on_progress,
+            supabase_sync=self.supabase_sync  # Pass Supabase sync
+        )
         
         # Start training in background thread
         import threading
         
         def train_thread():
             try:
-                result = trainer.train()
+                # Run async training
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(trainer.train())
                 
                 # Show success message
                 QMessageBox.information(
                     self,
                     "Training Complete",
-                    f"Model '{model_name}' trained successfully!\n\n"
-                    f"Win Rate: {result.get('win_rate', 0):.1f}%\n"
-                    f"Kelly Fraction: {result.get('kelly_fraction', 0):.2f}\n"
-                    f"Model ID: {result.get('model_id', 'N/A')}"
+                    f"Model '{model_name}' trained successfully!\\n\\n"
+                    f"Win Rate: {result.get('win_rate', 0):.1f}%\\n"
+                    f"Kelly Fraction: {result.get('kelly_fraction', 0):.2f}\\n"
+                    f"Model ID: {result.get('model_id', 'N/A')}\\n"
+                    f"Cloud Synced: {'Yes' if result.get('cloud_model_id') else 'No'}"
                 )
                 
             except Exception as e:
@@ -839,7 +885,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(
                     self,
                     "Training Failed",
-                    f"Failed to train model:\n{str(e)}"
+                    f"Failed to train model:\\n{str(e)}"
                 )
         
         thread = threading.Thread(target=train_thread, daemon=True)
