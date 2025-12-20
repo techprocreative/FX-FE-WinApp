@@ -1,10 +1,13 @@
 """
 NexusTrade Main Window
 Primary UI for the Windows connector application with Auto Trading
+
+Performance optimization: Heavy ML imports (AutoTrader, ModelSecurity) are 
+lazy-loaded in __init__ to speed up window display.
 """
 
 import asyncio
-from typing import Optional, Dict
+from typing import Optional, Dict, Any, TYPE_CHECKING
 from datetime import datetime
 
 from PyQt6.QtWidgets import (
@@ -19,11 +22,14 @@ from PyQt6.QtGui import QFont, QColor
 
 from core.config import Config
 from core.mt5_client import MT5Client
-from security.model_security import ModelSecurity
-from trading.auto_trader import AutoTrader, Signal, TradingConfig
 from api.server import set_mt5_client
 from ui.strategy_builder import StrategyBuilderTab
 from loguru import logger
+
+# Type hints only (no import at runtime)
+if TYPE_CHECKING:
+    from security.model_security import ModelSecurity
+    from trading.auto_trader import AutoTrader, Signal, TradingConfig
 
 
 class AutoTraderThread(QThread):
@@ -32,7 +38,7 @@ class AutoTraderThread(QThread):
     trade_executed = pyqtSignal(str, str, int, float)  # symbol, signal, ticket, volume
     error_occurred = pyqtSignal(str)
     
-    def __init__(self, auto_trader: AutoTrader, interval: int = 60):
+    def __init__(self, auto_trader: 'AutoTrader', interval: int = 60):
         super().__init__()
         self.auto_trader = auto_trader
         self.interval = interval
@@ -67,9 +73,14 @@ class MainWindow(QMainWindow):
         self.config = config
         self.user_data = user_data  # Store user data from login
         self.mt5_client = MT5Client()
+        
+        # Lazy load heavy ML modules (speeds up initial window display)
+        from security.model_security import ModelSecurity
+        from trading.auto_trader import AutoTrader
+        
         self.model_security = ModelSecurity()
         self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
-        self.trader_thread: Optional[AutoTraderThread] = None
+        self.trader_thread: Optional['AutoTraderThread'] = None
         
         # Supabase model sync with authenticated client
         from core.supabase_sync import SupabaseModelSync
@@ -931,6 +942,9 @@ class MainWindow(QMainWindow):
         
         # Load latest model
         model_id = sorted(symbol_models)[-1]
+        
+        # Lazy import for TradingConfig
+        from trading.auto_trader import TradingConfig
         config = TradingConfig(
             symbol=symbol,
             timeframe="M15",

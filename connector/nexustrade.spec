@@ -17,13 +17,13 @@ a = Analysis(
     pathex=[str(project_root)],
     binaries=[],
     datas=[
-        # Include config templates
+        # Include only essential modules (not training scripts)
         ('core/*.py', 'core'),
         ('api/*.py', 'api'),
         ('security/*.py', 'security'),
         ('trading/*.py', 'trading'),
         ('ui/*.py', 'ui'),
-        ('ai/*.py', 'ai'),
+        # NOTE: ai/*.py training scripts excluded - not needed at runtime
     ],
     hiddenimports=[
         # PyQt6
@@ -41,7 +41,7 @@ a = Analysis(
         'uvicorn.lifespan',
         'uvicorn.lifespan.on',
         'pydantic',
-        # ML
+        # ML (XGBoost only - TensorFlow removed for faster startup)
         'sklearn',
         'sklearn.ensemble',
         'sklearn.preprocessing',
@@ -49,10 +49,6 @@ a = Analysis(
         'numpy',
         'pandas',
         'joblib',
-        'tensorflow',
-        'tensorflow.keras',
-        'tensorflow.keras.models',
-        'tensorflow.keras.layers',
         # Supabase
         'supabase',
         'httpx',
@@ -71,12 +67,20 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
+        # Heavy unused libraries
+        'tensorflow',
+        'tensorflow.keras',
+        'keras',
+        # UI libraries not needed
         'matplotlib',
         'tkinter',
         'PIL',
+        # Development tools
         'IPython',
         'jupyter',
         'notebook',
+        'pytest',
+        'sphinx',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
