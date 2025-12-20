@@ -49,9 +49,16 @@ a = Analysis(
         'numpy',
         'pandas',
         'joblib',
+        'tensorflow',
+        'tensorflow.keras',
+        'tensorflow.keras.models',
+        'tensorflow.keras.layers',
         # Supabase
         'supabase',
         'httpx',
+        # OpenAI (for LLM integration)
+        'openai',
+        'openai.types',
         # Crypto
         'cryptography',
         'cryptography.fernet',
