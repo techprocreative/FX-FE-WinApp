@@ -17,13 +17,16 @@ a = Analysis(
     pathex=[str(project_root)],
     binaries=[],
     datas=[
-        # Include only essential modules (not training scripts)
+        # Include essential modules
         ('core/*.py', 'core'),
         ('api/*.py', 'api'),
         ('security/*.py', 'security'),
         ('trading/*.py', 'trading'),
         ('ui/*.py', 'ui'),
-        # NOTE: ai/*.py training scripts excluded - not needed at runtime
+        # Include only model_trainer (needed for demo training)
+        # Other ai/*.py scripts are standalone training scripts for development
+        ('ai/__init__.py', 'ai'),
+        ('ai/model_trainer.py', 'ai'),
     ],
     hiddenimports=[
         # PyQt6
