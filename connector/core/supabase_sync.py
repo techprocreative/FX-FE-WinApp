@@ -178,3 +178,65 @@ class SupabaseModelSync:
         except Exception as e:
             logger.error(f"Failed to get model for {symbol}: {e}")
             return None
+    
+    # ==================== MT5 Connection Status ====================
+    
+    async def update_mt5_connection_status(
+        self, 
+        is_online: bool,
+        mt5_login: str = "",
+        mt5_server: str = "",
+        connection_name: str = "Default Connection"
+    ) -> bool:
+        """Update MT5 connection status in Supabase for dashboard sync"""
+        try:
+            # First, check if connection exists
+            existing = (self.client.table('mt5_connections')
+                .select('id')
+                .eq('user_id', self.user_id)
+                .limit(1)
+                .execute())
+            
+            if existing.data:
+                # Update existing connection
+                connection_id = existing.data[0]['id']
+                update_data = {
+                    'is_online': is_online,
+                    'last_heartbeat': datetime.now().isoformat()
+                }
+                if mt5_login:
+                    update_data['mt5_login'] = mt5_login
+                if mt5_server:
+                    update_data['mt5_server'] = mt5_server
+                
+                self.client.table('mt5_connections').update(update_data).eq('id', connection_id).execute()
+                logger.info(f"Updated MT5 status in Supabase: is_online={is_online}")
+            else:
+                # Create new connection record
+                insert_data = {
+                    'user_id': self.user_id,
+                    'connection_name': connection_name,
+                    'is_online': is_online,
+                    'mt5_login': mt5_login,
+                    'mt5_server': mt5_server,
+                    'last_heartbeat': datetime.now().isoformat()
+                }
+                self.client.table('mt5_connections').insert(insert_data).execute()
+                logger.info(f"Created MT5 connection in Supabase: is_online={is_online}")
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update MT5 status in Supabase: {e}")
+            return False
+    
+    async def send_heartbeat(self) -> bool:
+        """Send heartbeat to keep connection status alive in dashboard"""
+        try:
+            self.client.table('mt5_connections').update({
+                'last_heartbeat': datetime.now().isoformat(),
+                'is_online': True
+            }).eq('user_id', self.user_id).execute()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send heartbeat: {e}")
+            return False

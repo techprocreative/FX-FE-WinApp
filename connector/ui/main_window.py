@@ -605,7 +605,7 @@ class MainWindow(QMainWindow):
         self.pos_timer.start(2000)
     
     def _check_mt5_connection(self):
-        """Check MT5 connection status"""
+        """Check MT5 connection status and sync to Supabase"""
         is_connected = self.mt5_client.is_connected
         
         if is_connected:
@@ -616,6 +616,29 @@ class MainWindow(QMainWindow):
             self.mt5_status_label.setStyleSheet("color: #ff6b6b; padding: 15px; font-size: 11px;")
         
         self.mt5_status_changed.emit(is_connected)
+        
+        # Sync MT5 status to Supabase for dashboard
+        if hasattr(self, 'supabase_sync') and self.supabase_sync:
+            import asyncio
+            try:
+                # Get MT5 login/server info if connected
+                mt5_login = ""
+                mt5_server = ""
+                if is_connected:
+                    account = self.mt5_client.get_account_info()
+                    if account:
+                        mt5_login = str(account.login) if hasattr(account, 'login') else ""
+                        mt5_server = account.server if hasattr(account, 'server') else ""
+                
+                asyncio.create_task(
+                    self.supabase_sync.update_mt5_connection_status(
+                        is_online=is_connected,
+                        mt5_login=mt5_login,
+                        mt5_server=mt5_server
+                    )
+                )
+            except Exception as e:
+                logger.error(f"Failed to sync MT5 status to Supabase: {e}")
     
     def _update_positions(self):
         """Update positions table and stats"""
