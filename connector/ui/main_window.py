@@ -671,13 +671,12 @@ class MainWindow(QMainWindow):
             asyncio.set_event_loop(loop)
             try:
                 loop.run_until_complete(self._fetch_and_sync_models())
-                # Update UI from main thread
-                from datetime import datetime
+                # Schedule UI update on main thread
                 timestamp = datetime.now().strftime("%H:%M:%S")
-                self.sync_status_label.setText(f"Last sync: {timestamp}")
+                QTimer.singleShot(0, lambda: self.sync_status_label.setText(f"Last sync: {timestamp}"))
             except Exception as e:
                 logger.error(f"Sync failed: {e}")
-                self.sync_status_label.setText(f"Sync failed: {e}")
+                QTimer.singleShot(0, lambda: self.sync_status_label.setText(f"Sync failed"))
             finally:
                 loop.close()
         

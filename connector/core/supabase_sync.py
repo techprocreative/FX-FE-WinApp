@@ -20,7 +20,8 @@ class SupabaseModelSync:
         self.client: Client = create_client(supabase_url, supabase_key)
         self.user_id = user_id
         self.bucket_name = 'ml-models'
-        self.local_models_dir = Path('./models')
+        # Use proper user directory for models
+        self.local_models_dir = Path.home() / '.nexustrade' / 'models'
         self.local_models_dir.mkdir(parents=True, exist_ok=True)
     
     async def fetch_user_models(self) -> List[Dict[str, Any]]:
