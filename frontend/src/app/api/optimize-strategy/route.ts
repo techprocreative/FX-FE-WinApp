@@ -2,17 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-// Initialize Supabase client with service key for server-side operations
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!
-);
+// Helper to get Supabase client (lazy initialization)
+function getSupabaseClient() {
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_KEY!
+    );
+}
 
-// Initialize OpenAI client for OpenRouter
-const openai = new OpenAI({
-    apiKey: process.env.OPENROUTER_API_KEY,
-    baseURL: 'https://openrouter.ai/api/v1',
-});
+// Helper to get OpenAI client (lazy initialization)
+function getOpenAIClient() {
+    return new OpenAI({
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseURL: 'https://openrouter.ai/api/v1',
+    });
+}
 
 const STRATEGY_OPTIMIZER_PROMPT = `You are an expert trading strategy optimizer specializing in forex and cryptocurrency markets.
 
@@ -97,6 +101,8 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        const supabase = getSupabaseClient();
+
         // Check user subscription tier
         const { data: subscription, error: subError } = await supabase
             .from('subscriptions')
@@ -159,6 +165,7 @@ Risk Level: ${risk_level}
 Generate optimal training configuration.`;
 
         // Call LLM
+        const openai = getOpenAIClient();
         const completion = await openai.chat.completions.create({
             model: 'anthropic/claude-3.5-sonnet',
             messages: [
@@ -235,6 +242,7 @@ async function getMonthlyUsage(userId: string): Promise<number> {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
 
+    const supabase = getSupabaseClient();
     const { count } = await supabase
         .from('llm_logs')
         .select('*', { count: 'exact', head: true })
