@@ -27,58 +27,26 @@ def setup_exception_handler():
     def exception_hook(exctype, value, traceback):
         logger.exception(f"Uncaught exception: {value}")
         sys.__excepthook__(exctype, value, traceback)
-    
-    sys.excepthook = exception_hook
+logger.info("=" * 80)
+logger.info("NexusTrade Connector Starting...")
+logger.info(f"Python version: {sys.version}")
+logger.info(f"Working directory: {os.getcwd()}")
+logger.info(f"Log file: {log_file}")
+logger.info("=" * 80)
 
+try:
+    from PyQt6.QtWidgets import QApplication, QMessageBox
+    from PyQt6.QtCore import Qt
+    logger.info("✓ PyQt6 imported successfully")
+except Exception as e:
+    logger.critical(f"✗ Failed to import PyQt6: {e}")
+    print(f"CRITICAL ERROR: Failed to import PyQt6: {e}")
+    print(f"Check log file: {log_file}")
+    sys.exit(1)
 
-async def main():
-    """Main application entry point"""
-    logger.info("Starting NexusTrade Windows Connector...")
-    
-    # Load configuration
-    config = Config()
-    logger.info(f"Configuration loaded from {config.config_path}")
-    
-    # Setup exception handler
-    setup_exception_handler()
-    
-    # Create Qt application
-    app = QApplication(sys.argv)
-    app.setApplicationName("NexusTrade")
-    app.setOrganizationName("NexusTrade")
-    app.setApplicationVersion("1.0.0")
-    
-    # Enable high DPI scaling
-    app.setHighDpiScaleFactorRoundingPolicy(
-        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-    )
-    
-    # Show login window first
+try:
+    from core.config import Config
     from ui.login_window import LoginWindow
-    
-    login_window = LoginWindow(
-        config.supabase.url,
-        config.supabase.anon_key
-    )
-    
-    user_data = {}
-    
-    def on_login_success(data):
-        nonlocal user_data
-        user_data = data
-        logger.info(f"User logged in: {data['email']}")
-    
-    login_window.login_successful.connect(on_login_success)
-    login_window.show()
-    
-    # Wait for login window to close
-    while login_window.isVisible():
-        app.processEvents()
-        await asyncio.sleep(0.1)
-    
-    # Check if login was successful
-    if not user_data:
-        logger.info("Login cancelled by user")
         return 0
     
     # Create main window with user data
