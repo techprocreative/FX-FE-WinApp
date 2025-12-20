@@ -1,3 +1,5 @@
+const colors = require('tailwindcss/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
@@ -8,6 +10,10 @@ module.exports = {
     theme: {
         extend: {
             colors: {
+                slate: colors.slate,
+                indigo: colors.indigo,
+                purple: colors.purple,
+                pink: colors.pink,
                 primary: {
                     DEFAULT: '#e94560',
                     50: '#fef2f4',
