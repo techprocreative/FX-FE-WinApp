@@ -39,32 +39,69 @@ function LoginForm() {
     };
 
     return (
-        <div className="w-full max-w-md">
+        <div style={{ width: '100%', maxWidth: '28rem' }}>
             {/* Logo */}
-            <div className="text-center mb-8">
-                <Link href="/">
-                    <h1 className="text-4xl font-bold text-gradient">NexusTrade</h1>
+            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                <Link href="/" style={{ textDecoration: 'none' }}>
+                    <h1 style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text',
+                        margin: 0
+                    }}>
+                        NexusTrade
+                    </h1>
                 </Link>
-                <p className="text-gray-400 mt-2">Login ke akun Anda</p>
+                <p style={{ color: '#94a3b8', marginTop: '0.5rem' }}>Login ke akun Anda</p>
             </div>
 
             {/* Form Card */}
-            <div className="bg-dark-50 rounded-xl border border-dark-100 p-8">
+            <div style={{
+                background: 'rgba(30, 41, 59, 0.5)',
+                borderRadius: '1rem',
+                border: '1px solid rgba(6, 182, 212, 0.2)',
+                padding: '2rem',
+                backdropFilter: 'blur(10px)'
+            }}>
                 {message && (
-                    <div className="mb-6 p-3 bg-accent-green/20 border border-accent-green rounded-lg text-accent-green text-sm">
+                    <div style={{
+                        marginBottom: '1.5rem',
+                        padding: '0.75rem',
+                        background: 'rgba(16, 185, 129, 0.1)',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                        borderRadius: '0.5rem',
+                        color: '#10b981',
+                        fontSize: '0.875rem'
+                    }}>
                         {message}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {error && (
-                        <div className="p-3 bg-accent-red/20 border border-accent-red rounded-lg text-accent-red text-sm">
+                        <div style={{
+                            padding: '0.75rem',
+                            background: 'rgba(244, 63, 94, 0.1)',
+                            border: '1px solid rgba(244, 63, 94, 0.3)',
+                            borderRadius: '0.5rem',
+                            color: '#f43f5e',
+                            fontSize: '0.875rem'
+                        }}>
                             {error}
                         </div>
                     )}
 
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium mb-2">
+                        <label htmlFor="email" style={{
+                            display: 'block',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            marginBottom: '0.5rem',
+                            color: '#cbd5e1'
+                        }}>
                             Email
                         </label>
                         <input
@@ -72,13 +109,31 @@ function LoginForm() {
                             name="email"
                             type="email"
                             required
-                            className="w-full px-4 py-3 bg-dark border border-dark-100 rounded-lg focus:outline-none focus:border-primary"
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem 1rem',
+                                background: 'rgba(15, 23, 42, 0.5)',
+                                border: '1px solid rgba(6, 182, 212, 0.2)',
+                                borderRadius: '0.5rem',
+                                color: 'white',
+                                fontSize: '1rem',
+                                outline: 'none',
+                                transition: 'border-color 0.3s'
+                            }}
                             placeholder="email@example.com"
+                            onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
+                            onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.2)'}
                         />
                     </div>
 
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium mb-2">
+                        <label htmlFor="password" style={{
+                            display: 'block',
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            marginBottom: '0.5rem',
+                            color: '#cbd5e1'
+                        }}>
                             Password
                         </label>
                         <input
@@ -86,23 +141,47 @@ function LoginForm() {
                             name="password"
                             type="password"
                             required
-                            className="w-full px-4 py-3 bg-dark border border-dark-100 rounded-lg focus:outline-none focus:border-primary"
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem 1rem',
+                                background: 'rgba(15, 23, 42, 0.5)',
+                                border: '1px solid rgba(6, 182, 212, 0.2)',
+                                borderRadius: '0.5rem',
+                                color: 'white',
+                                fontSize: '1rem',
+                                outline: 'none',
+                                transition: 'border-color 0.3s'
+                            }}
                             placeholder="••••••••"
+                            onFocus={(e) => e.target.style.borderColor = '#06b6d4'}
+                            onBlur={(e) => e.target.style.borderColor = 'rgba(6, 182, 212, 0.2)'}
                         />
                     </div>
 
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3 bg-primary rounded-lg font-semibold hover:bg-primary-600 transition-colors disabled:opacity-50"
+                        style={{
+                            width: '100%',
+                            padding: '0.75rem',
+                            background: loading ? 'rgba(6, 182, 212, 0.5)' : 'linear-gradient(135deg, #06b6d4, #14b8a6)',
+                            borderRadius: '0.5rem',
+                            fontWeight: 'bold',
+                            color: 'white',
+                            border: 'none',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '1rem',
+                            boxShadow: '0 4px 20px rgba(6, 182, 212, 0.3)',
+                            transition: 'all 0.3s'
+                        }}
                     >
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
 
-                <div className="mt-6 text-center text-gray-400">
+                <div style={{ marginTop: '1.5rem', textAlign: 'center', color: '#94a3b8' }}>
                     Belum punya akun?{' '}
-                    <Link href="/auth/signup" className="text-primary hover:underline">
+                    <Link href="/auth/signup" style={{ color: '#06b6d4', textDecoration: 'none', fontWeight: '500' }}>
                         Daftar
                     </Link>
                 </div>
@@ -113,11 +192,28 @@ function LoginForm() {
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen bg-dark flex items-center justify-center p-4">
+        <div style={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem',
+            fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
             <Suspense fallback={
-                <div className="w-full max-w-md text-center">
-                    <div className="text-4xl font-bold text-gradient">NexusTrade</div>
-                    <p className="text-gray-400 mt-4">Loading...</p>
+                <div style={{ textAlign: 'center', color: 'white' }}>
+                    <div style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        backgroundClip: 'text'
+                    }}>
+                        NexusTrade
+                    </div>
+                    <p style={{ color: '#94a3b8', marginTop: '1rem' }}>Loading...</p>
                 </div>
             }>
                 <LoginForm />

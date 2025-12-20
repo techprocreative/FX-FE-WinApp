@@ -4,7 +4,7 @@ export default function HomePage() {
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
             color: 'white',
             fontFamily: 'system-ui, -apple-system, sans-serif'
         }}>
@@ -14,30 +14,34 @@ export default function HomePage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                background: 'rgba(0,0,0,0.2)',
-                backdropFilter: 'blur(10px)'
+                background: 'rgba(15, 23, 42, 0.8)',
+                backdropFilter: 'blur(10px)',
+                borderBottom: '1px solid rgba(6, 182, 212, 0.2)'
             }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0, color: '#06b6d4' }}>
                     NexusTrade
                 </h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <Link href="/auth/login" style={{
                         padding: '0.5rem 1.5rem',
-                        background: 'rgba(255,255,255,0.2)',
+                        background: 'rgba(6, 182, 212, 0.1)',
+                        border: '1px solid rgba(6, 182, 212, 0.3)',
                         borderRadius: '8px',
                         textDecoration: 'none',
-                        color: 'white',
-                        fontWeight: '500'
+                        color: '#06b6d4',
+                        fontWeight: '500',
+                        transition: 'all 0.3s'
                     }}>
                         Login
                     </Link>
                     <Link href="/auth/signup" style={{
                         padding: '0.5rem 1.5rem',
-                        background: 'white',
-                        color: '#667eea',
+                        background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
                         borderRadius: '8px',
                         textDecoration: 'none',
-                        fontWeight: 'bold'
+                        color: 'white',
+                        fontWeight: 'bold',
+                        boxShadow: '0 4px 20px rgba(6, 182, 212, 0.3)'
                     }}>
                         Daftar Gratis
                     </Link>
@@ -54,10 +58,12 @@ export default function HomePage() {
                 <div style={{
                     display: 'inline-block',
                     padding: '0.5rem 1rem',
-                    background: 'rgba(255,255,255,0.2)',
+                    background: 'rgba(6, 182, 212, 0.15)',
+                    border: '1px solid rgba(6, 182, 212, 0.3)',
                     borderRadius: '20px',
                     fontSize: '0.875rem',
-                    marginBottom: '2rem'
+                    marginBottom: '2rem',
+                    color: '#06b6d4'
                 }}>
                     🚀 AI Trading Platform v1.0
                 </div>
@@ -66,7 +72,11 @@ export default function HomePage() {
                     fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
                     fontWeight: '900',
                     lineHeight: '1.2',
-                    marginBottom: '1.5rem'
+                    marginBottom: '1.5rem',
+                    background: 'linear-gradient(135deg, #ffffff, #06b6d4)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
                 }}>
                     Trading Forex dengan<br />
                     Kecerdasan Buatan
@@ -76,8 +86,9 @@ export default function HomePage() {
                     fontSize: '1.25rem',
                     maxWidth: '600px',
                     margin: '0 auto 3rem',
-                    opacity: 0.95,
-                    lineHeight: '1.6'
+                    opacity: 0.9,
+                    lineHeight: '1.6',
+                    color: '#cbd5e1'
                 }}>
                     Platform auto-trading yang menggabungkan Machine Learning dengan analisis teknikal untuk hasil maksimal
                 </p>
@@ -90,25 +101,26 @@ export default function HomePage() {
                 }}>
                     <Link href="/auth/signup" style={{
                         padding: '1rem 2.5rem',
-                        background: 'white',
-                        color: '#667eea',
+                        background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
                         borderRadius: '12px',
                         textDecoration: 'none',
+                        color: 'white',
                         fontWeight: 'bold',
                         fontSize: '1.125rem',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+                        boxShadow: '0 10px 40px rgba(6, 182, 212, 0.4)',
+                        transition: 'transform 0.3s'
                     }}>
                         Mulai Sekarang →
                     </Link>
                     <a href="#features" style={{
                         padding: '1rem 2.5rem',
-                        background: 'rgba(255,255,255,0.2)',
-                        color: 'white',
+                        background: 'rgba(6, 182, 212, 0.1)',
+                        border: '2px solid rgba(6, 182, 212, 0.3)',
                         borderRadius: '12px',
                         textDecoration: 'none',
+                        color: '#06b6d4',
                         fontWeight: 'bold',
-                        fontSize: '1.125rem',
-                        border: '2px solid rgba(255,255,255,0.3)'
+                        fontSize: '1.125rem'
                     }}>
                         Lihat Fitur
                     </a>
@@ -117,9 +129,10 @@ export default function HomePage() {
 
             {/* Stats */}
             <div style={{
-                background: 'rgba(0,0,0,0.2)',
+                background: 'rgba(15, 23, 42, 0.6)',
                 padding: '3rem 2rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)'
+                borderTop: '1px solid rgba(6, 182, 212, 0.2)',
+                borderBottom: '1px solid rgba(6, 182, 212, 0.2)'
             }}>
                 <div style={{
                     maxWidth: '1200px',
@@ -130,20 +143,20 @@ export default function HomePage() {
                     textAlign: 'center'
                 }}>
                     <div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>$1.2M+</div>
-                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Trading Volume</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#06b6d4' }}>$1.2M+</div>
+                        <div style={{ opacity: 0.7, marginTop: '0.5rem', color: '#cbd5e1' }}>Trading Volume</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>98.5%</div>
-                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>AI Accuracy</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#10b981' }}>98.5%</div>
+                        <div style={{ opacity: 0.7, marginTop: '0.5rem', color: '#cbd5e1' }}>AI Accuracy</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>24/7</div>
-                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Auto Trading</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#06b6d4' }}>24/7</div>
+                        <div style={{ opacity: 0.7, marginTop: '0.5rem', color: '#cbd5e1' }}>Auto Trading</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>&lt;50ms</div>
-                        <div style={{ opacity: 0.8, marginTop: '0.5rem' }}>Execution</div>
+                        <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#14b8a6' }}>&lt;50ms</div>
+                        <div style={{ opacity: 0.7, marginTop: '0.5rem', color: '#cbd5e1' }}>Execution</div>
                     </div>
                 </div>
             </div>
@@ -158,7 +171,8 @@ export default function HomePage() {
                     fontSize: '2.5rem',
                     fontWeight: 'bold',
                     textAlign: 'center',
-                    marginBottom: '4rem'
+                    marginBottom: '4rem',
+                    color: 'white'
                 }}>
                     Fitur Unggulan
                 </h2>
@@ -169,49 +183,52 @@ export default function HomePage() {
                     gap: '2rem'
                 }}>
                     <div style={{
-                        background: 'rgba(255,255,255,0.1)',
+                        background: 'rgba(30, 41, 59, 0.5)',
                         padding: '2rem',
                         borderRadius: '16px',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255,255,255,0.2)'
+                        border: '1px solid rgba(6, 182, 212, 0.2)',
+                        transition: 'all 0.3s'
                     }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🧠</div>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#06b6d4' }}>
                             AI Strategy Generator
                         </h3>
-                        <p style={{ opacity: 0.9, lineHeight: '1.6' }}>
+                        <p style={{ opacity: 0.8, lineHeight: '1.6', color: '#cbd5e1' }}>
                             Buat strategi trading kompleks hanya dengan menjelaskan ide Anda dalam bahasa sehari-hari
                         </p>
                     </div>
 
                     <div style={{
-                        background: 'rgba(255,255,255,0.1)',
+                        background: 'rgba(30, 41, 59, 0.5)',
                         padding: '2rem',
                         borderRadius: '16px',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255,255,255,0.2)'
+                        border: '1px solid rgba(6, 182, 212, 0.2)',
+                        transition: 'all 0.3s'
                     }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚡</div>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#06b6d4' }}>
                             Ultra-Fast Backtesting
                         </h3>
-                        <p style={{ opacity: 0.9, lineHeight: '1.6' }}>
+                        <p style={{ opacity: 0.8, lineHeight: '1.6', color: '#cbd5e1' }}>
                             Validasi strategi dengan data historis 5 tahun dalam hitungan detik
                         </p>
                     </div>
 
                     <div style={{
-                        background: 'rgba(255,255,255,0.1)',
+                        background: 'rgba(30, 41, 59, 0.5)',
                         padding: '2rem',
                         borderRadius: '16px',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255,255,255,0.2)'
+                        border: '1px solid rgba(6, 182, 212, 0.2)',
+                        transition: 'all 0.3s'
                     }}>
                         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🤖</div>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem', color: '#06b6d4' }}>
                             ML Auto-Trading
                         </h3>
-                        <p style={{ opacity: 0.9, lineHeight: '1.6' }}>
+                        <p style={{ opacity: 0.8, lineHeight: '1.6', color: '#cbd5e1' }}>
                             Model Machine Learning mengeksekusi trade 24/7 berdasarkan probabilitas tertinggi
                         </p>
                     </div>
@@ -220,16 +237,17 @@ export default function HomePage() {
 
             {/* Pricing */}
             <div style={{
-                background: 'rgba(0,0,0,0.2)',
+                background: 'rgba(15, 23, 42, 0.6)',
                 padding: '6rem 2rem',
-                borderTop: '1px solid rgba(255,255,255,0.1)'
+                borderTop: '1px solid rgba(6, 182, 212, 0.2)'
             }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <h2 style={{
                         fontSize: '2.5rem',
                         fontWeight: 'bold',
                         textAlign: 'center',
-                        marginBottom: '4rem'
+                        marginBottom: '4rem',
+                        color: 'white'
                     }}>
                         Paket Langganan
                     </h2>
@@ -243,16 +261,16 @@ export default function HomePage() {
                     }}>
                         {/* Free */}
                         <div style={{
-                            background: 'rgba(255,255,255,0.1)',
+                            background: 'rgba(30, 41, 59, 0.5)',
                             padding: '2rem',
                             borderRadius: '16px',
-                            border: '1px solid rgba(255,255,255,0.2)'
+                            border: '1px solid rgba(6, 182, 212, 0.2)'
                         }}>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Starter</h3>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#cbd5e1' }}>Starter</h3>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: 'white' }}>
                                 Gratis
                             </div>
-                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', opacity: 0.9 }}>
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', color: '#cbd5e1' }}>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ Manual Trading</li>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ 30 Hari History</li>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ 10 AI Request/hari</li>
@@ -260,11 +278,12 @@ export default function HomePage() {
                             <Link href="/auth/signup" style={{
                                 display: 'block',
                                 padding: '0.75rem',
-                                background: 'rgba(255,255,255,0.2)',
+                                background: 'rgba(6, 182, 212, 0.1)',
+                                border: '1px solid rgba(6, 182, 212, 0.3)',
                                 borderRadius: '8px',
                                 textAlign: 'center',
                                 textDecoration: 'none',
-                                color: 'white',
+                                color: '#06b6d4',
                                 fontWeight: 'bold'
                             }}>
                                 Mulai Gratis
@@ -273,20 +292,21 @@ export default function HomePage() {
 
                         {/* Pro */}
                         <div style={{
-                            background: 'linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1))',
+                            background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(20, 184, 166, 0.1))',
                             padding: '2rem',
                             borderRadius: '16px',
-                            border: '2px solid rgba(255,255,255,0.4)',
+                            border: '2px solid #06b6d4',
                             position: 'relative',
-                            transform: 'scale(1.05)'
+                            transform: 'scale(1.05)',
+                            boxShadow: '0 10px 40px rgba(6, 182, 212, 0.3)'
                         }}>
                             <div style={{
                                 position: 'absolute',
                                 top: '-12px',
                                 left: '50%',
                                 transform: 'translateX(-50%)',
-                                background: 'white',
-                                color: '#667eea',
+                                background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
+                                color: 'white',
                                 padding: '0.25rem 1rem',
                                 borderRadius: '20px',
                                 fontSize: '0.75rem',
@@ -294,11 +314,11 @@ export default function HomePage() {
                             }}>
                                 POPULER
                             </div>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Pro Trader</h3>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
-                                Rp 449K<span style={{ fontSize: '1rem', fontWeight: 'normal' }}>/bln</span>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#06b6d4' }}>Pro Trader</h3>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: 'white' }}>
+                                Rp 449K<span style={{ fontSize: '1rem', fontWeight: 'normal', color: '#cbd5e1' }}>/bln</span>
                             </div>
-                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem' }}>
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', color: 'white' }}>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ AI Strategy Generator</li>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ ML Auto-Trading</li>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ Unlimited Backtesting</li>
@@ -307,13 +327,13 @@ export default function HomePage() {
                             <Link href="/auth/signup" style={{
                                 display: 'block',
                                 padding: '0.75rem',
-                                background: 'white',
-                                color: '#667eea',
+                                background: 'linear-gradient(135deg, #06b6d4, #14b8a6)',
                                 borderRadius: '8px',
                                 textAlign: 'center',
                                 textDecoration: 'none',
+                                color: 'white',
                                 fontWeight: 'bold',
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                                boxShadow: '0 4px 20px rgba(6, 182, 212, 0.4)'
                             }}>
                                 Upgrade Pro
                             </Link>
@@ -321,16 +341,16 @@ export default function HomePage() {
 
                         {/* Enterprise */}
                         <div style={{
-                            background: 'rgba(255,255,255,0.1)',
+                            background: 'rgba(30, 41, 59, 0.5)',
                             padding: '2rem',
                             borderRadius: '16px',
-                            border: '1px solid rgba(255,255,255,0.2)'
+                            border: '1px solid rgba(6, 182, 212, 0.2)'
                         }}>
-                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem' }}>Enterprise</h3>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: '#cbd5e1' }}>Enterprise</h3>
+                            <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '1.5rem', color: 'white' }}>
                                 Custom
                             </div>
-                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', opacity: 0.9 }}>
+                            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '2rem', color: '#cbd5e1' }}>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ Custom AI Models</li>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ Dedicated Server</li>
                                 <li style={{ marginBottom: '0.75rem' }}>✓ White Label</li>
@@ -339,11 +359,12 @@ export default function HomePage() {
                             <Link href="/auth/signup" style={{
                                 display: 'block',
                                 padding: '0.75rem',
-                                background: 'rgba(255,255,255,0.2)',
+                                background: 'rgba(6, 182, 212, 0.1)',
+                                border: '1px solid rgba(6, 182, 212, 0.3)',
                                 borderRadius: '8px',
                                 textAlign: 'center',
                                 textDecoration: 'none',
-                                color: 'white',
+                                color: '#06b6d4',
                                 fontWeight: 'bold'
                             }}>
                                 Hubungi Sales
@@ -357,8 +378,8 @@ export default function HomePage() {
             <footer style={{
                 padding: '3rem 2rem',
                 textAlign: 'center',
-                borderTop: '1px solid rgba(255,255,255,0.1)',
-                opacity: 0.8
+                borderTop: '1px solid rgba(6, 182, 212, 0.2)',
+                color: '#94a3b8'
             }}>
                 <p>© 2024 NexusTrade. All rights reserved.</p>
             </footer>
