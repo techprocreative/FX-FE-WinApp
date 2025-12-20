@@ -325,103 +325,65 @@ class MainWindow(QMainWindow):
         """Dashboard with account stats"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
-        
+        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
+        layout.setSpacing(DT.SPACE_LG)
+
         # Header
         header = QLabel("Dashboard")
-        header.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
-        header.setStyleSheet("color: #ffffff;")
+        header.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_3XL, DT.WEIGHT_BOLD))
+        header.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; font-family: {DT.FONT_FAMILY};")
         layout.addWidget(header)
-        
+
         # Stats cards
         cards_layout = QHBoxLayout()
-        cards_layout.setSpacing(20)
-        
+        cards_layout.setSpacing(DT.SPACE_LG)
+
         stats = [
-            ("balance", "Account Balance", "$0.00", "#4ecca3"),
-            ("profit", "Today's P/L", "$0.00", "#e94560"),
-            ("positions", "Open Positions", "0", "#0f3460"),
-            ("win_rate", "Win Rate", "0%", "#ffd369"),
+            ("balance", "Account Balance", "$0.00", DT.SUCCESS),
+            ("profit", "Today's P/L", "$0.00", DT.DANGER),
+            ("positions", "Open Positions", "0", DT.PRIMARY),
+            ("win_rate", "Win Rate", "0%", DT.WARNING),
         ]
-        
+
         for key, title, value, color in stats:
             card, value_label = self._create_stat_card(title, value, color)
             self.stat_values[key] = value_label
             cards_layout.addWidget(card)
-        
+
         layout.addLayout(cards_layout)
-        
-        # Positions table
+
+        # Positions table - inherits from global stylesheet
         pos_group = QGroupBox("Open Positions")
-        pos_group.setStyleSheet("""
-            QGroupBox {
-                color: #fff;
-                font-size: 14px;
-                border: 1px solid #0f3460;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 15px;
-                padding: 0 5px;
-            }
-        """)
         pos_layout = QVBoxLayout(pos_group)
-        
+
         self.position_table = QTableWidget()
         self.position_table.setColumnCount(7)
         self.position_table.setHorizontalHeaderLabels([
             "Symbol", "Type", "Volume", "Open Price", "Current", "Profit", "Time"
         ])
         self.position_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.position_table.setStyleSheet("""
-            QTableWidget {
-                background-color: #16213e;
-                color: #fff;
-                border: none;
-            }
-            QHeaderView::section {
-                background-color: #0f3460;
-                color: #fff;
-                padding: 8px;
-                border: none;
-            }
-        """)
         pos_layout.addWidget(self.position_table)
-        
+
         layout.addWidget(pos_group)
         layout.addStretch()
-        
+
         return page
     
     def _create_trading_page(self) -> QWidget:
         """Auto trading control page"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
-        
+        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
+        layout.setSpacing(DT.SPACE_LG)
+
         # Header
         header = QLabel("Auto Trading")
-        header.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
-        header.setStyleSheet("color: #ffffff;")
+        header.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_3XL, DT.WEIGHT_BOLD))
+        header.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; font-family: {DT.FONT_FAMILY};")
         layout.addWidget(header)
-        
-        # Control panel
+
+        # Control panel - inherits from global QGroupBox style
         control_group = QGroupBox("Trading Control")
-        control_group.setStyleSheet("""
-            QGroupBox {
-                color: #fff;
-                font-size: 14px;
-                border: 1px solid #0f3460;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding: 15px;
-            }
-        """)
         control_layout = QHBoxLayout(control_group)
 
         # Start/Stop buttons with design system
@@ -479,28 +441,14 @@ class MainWindow(QMainWindow):
         
         layout.addLayout(signals_layout)
         
-        # Trade log
+        # Trade log - inherits from global stylesheet
         log_group = QGroupBox("Recent Signals")
-        log_group.setStyleSheet("""
-            QGroupBox {
-                color: #fff;
-                font-size: 14px;
-                border: 1px solid #0f3460;
-                border-radius: 8px;
-                margin-top: 10px;
-                padding: 15px;
-            }
-        """)
         log_layout = QVBoxLayout(log_group)
-        
+
         self.log_table = QTableWidget()
         self.log_table.setColumnCount(5)
         self.log_table.setHorizontalHeaderLabels(["Time", "Symbol", "Signal", "Confidence", "Action"])
         self.log_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.log_table.setStyleSheet("""
-            QTableWidget { background-color: #16213e; color: #fff; border: none; }
-            QHeaderView::section { background-color: #0f3460; color: #fff; padding: 8px; border: none; }
-        """)
         log_layout.addWidget(self.log_table)
         
         layout.addWidget(log_group)
@@ -510,62 +458,62 @@ class MainWindow(QMainWindow):
     def _create_signal_card(self, symbol: str) -> QFrame:
         """Create a signal display card for a symbol - Modern style"""
         card = QFrame()
-        card.setStyleSheet("""
-            QFrame {
+        card.setStyleSheet(f"""
+            QFrame {{
                 background: qlineargradient(
                     x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(30, 41, 59, 0.8), stop:1 rgba(15, 23, 42, 0.6)
+                    stop:0 {DT.GLASS_MEDIUM}, stop:1 {DT.GLASS_DARKEST}
                 );
-                border: 1px solid rgba(6, 182, 212, 0.2);
-                border-radius: 16px;
-            }
+                border: 1px solid {DT.BORDER_DEFAULT};
+                border-radius: {DT.RADIUS_2XL}px;
+            }}
         """)
-        
+
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(24, 24, 24, 24)
-        layout.setSpacing(16)
-        
+        layout.setContentsMargins(DT.SPACE_XL, DT.SPACE_XL, DT.SPACE_XL, DT.SPACE_XL)
+        layout.setSpacing(DT.SPACE_BASE)
+
         # Symbol header with icon
         sym_label = QLabel(f"📊 {symbol}")
-        sym_label.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
-        sym_label.setStyleSheet("color: #f8fafc; background: transparent;")
+        sym_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XL, DT.WEIGHT_BOLD))
+        sym_label.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; background: transparent;")
         layout.addWidget(sym_label)
-        
+
         # Signal indicator
         signal_label = QLabel("WAITING")
-        signal_label.setFont(QFont("Segoe UI", 28, QFont.Weight.Bold))
+        signal_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_4XL, DT.WEIGHT_BOLD))
         signal_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        signal_label.setStyleSheet("""
-            color: #64748b;
-            background: rgba(15, 23, 42, 0.5);
-            border-radius: 12px;
-            padding: 24px;
+        signal_label.setStyleSheet(f"""
+            color: {DT.TEXT_PLACEHOLDER};
+            background: {DT.GLASS_DARKEST};
+            border-radius: {DT.RADIUS_XL}px;
+            padding: {DT.SPACE_XL}px;
         """)
         layout.addWidget(signal_label)
         self.signal_labels[symbol] = signal_label
-        
+
         # Load model button
         load_btn = QPushButton(f"🔄 Load {symbol} Model")
         load_btn.setObjectName("loadModelBtn")
         load_btn.clicked.connect(lambda: self._load_model(symbol))
         layout.addWidget(load_btn)
-        
+
         return card
     
     def _create_models_page(self) -> QWidget:
         """ML Models management page"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(30, 30, 30, 30)
+        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
+        layout.setSpacing(DT.SPACE_LG)
 
         header = QLabel("ML Models")
-        header.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
-        header.setStyleSheet("color: #ffffff;")
+        header.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_3XL, DT.WEIGHT_BOLD))
+        header.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; font-family: {DT.FONT_FAMILY};")
         layout.addWidget(header)
 
-        # Model list
+        # Model list - inherits from global QGroupBox style
         models_group = QGroupBox("Available Models")
-        models_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; }")
         models_layout = QVBoxLayout(models_group)
 
         # List models
@@ -574,34 +522,57 @@ class MainWindow(QMainWindow):
         if models:
             for model_id in models:
                 model_row = QHBoxLayout()
-                model_row.addWidget(QLabel(f"📦 {model_id}"))
+                model_label = QLabel(f"📦 {model_id}")
+                model_label.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; font-family: {DT.FONT_FAMILY};")
+                model_row.addWidget(model_label)
                 model_row.addStretch()
                 delete_btn = QPushButton("Delete")
-                delete_btn.setStyleSheet("background: #e94560; color: #fff; padding: 5px 10px; border-radius: 3px;")
+                delete_btn.setFixedHeight(DT.BUTTON_HEIGHT_SM)
+                delete_btn.setStyleSheet(f"""
+                    QPushButton {{
+                        background: {StyleSheets.gradient_danger()};
+                        color: white;
+                        padding: {DT.SPACE_SM}px {DT.SPACE_BASE}px;
+                        border-radius: {DT.RADIUS_SM}px;
+                        border: none;
+                        font-weight: {DT.WEIGHT_SEMIBOLD};
+                        font-family: {DT.FONT_FAMILY};
+                    }}
+                    QPushButton:hover {{
+                        background: {StyleSheets.gradient_danger_hover()};
+                    }}
+                """)
                 model_row.addWidget(delete_btn)
                 models_layout.addLayout(model_row)
         else:
-            models_layout.addWidget(QLabel("No models found. Train models first."))
-        
+            no_models_label = QLabel("No models found. Train models first.")
+            no_models_label.setStyleSheet(f"color: {DT.TEXT_DISABLED}; font-family: {DT.FONT_FAMILY};")
+            models_layout.addWidget(no_models_label)
+
         # Train button
         train_btn = QPushButton("🔧 Train New Models (BTC & XAU)")
-        train_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #4ecca3;
-                color: #000;
-                padding: 15px;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: bold;
-                margin-top: 20px;
-            }
+        train_btn.setFixedHeight(DT.BUTTON_HEIGHT_LG)
+        train_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {DT.SUCCESS};
+                color: white;
+                padding: {DT.SPACE_MD}px {DT.SPACE_XL}px;
+                border-radius: {DT.RADIUS_LG}px;
+                font-size: {DT.FONT_BASE}px;
+                font-weight: {DT.WEIGHT_BOLD};
+                font-family: {DT.FONT_FAMILY};
+                border: none;
+            }}
+            QPushButton:hover {{
+                background: {DT.SUCCESS_DARK};
+            }}
         """)
         train_btn.clicked.connect(self._train_models)
         models_layout.addWidget(train_btn)
-        
+
         layout.addWidget(models_group)
         layout.addStretch()
-        
+
         return page
     
     def _refresh_models_page_ui(self):
@@ -626,98 +597,138 @@ class MainWindow(QMainWindow):
         """Settings page with account, MT5, and logout"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(30, 30, 30, 30)
-        layout.setSpacing(20)
-        
+        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
+        layout.setSpacing(DT.SPACE_LG)
+
         header = QLabel("Settings")
-        header.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
-        header.setStyleSheet("color: #ffffff;")
+        header.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_3XL, DT.WEIGHT_BOLD))
+        header.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; font-family: {DT.FONT_FAMILY};")
         layout.addWidget(header)
-        
-        # Account section
+
+        # Account section - inherits from global QGroupBox style
         account_group = QGroupBox("Account")
-        account_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-top: 10px; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }")
         account_layout = QVBoxLayout(account_group)
-        
+
         # User info
         user_email = self.user_data.get('email', 'Unknown')
         email_label = QLabel(f"Logged in as: {user_email}")
-        email_label.setStyleSheet("color: #4ecca3; font-size: 14px; font-weight: bold;")
+        email_label.setStyleSheet(f"""
+            color: {DT.SUCCESS};
+            font-size: {DT.FONT_BASE}px;
+            font-weight: {DT.WEIGHT_BOLD};
+            font-family: {DT.FONT_FAMILY};
+        """)
         account_layout.addWidget(email_label)
-        
+
         # Logout button
         logout_btn = QPushButton("🚪 Logout")
-        logout_btn.setStyleSheet("""
-            QPushButton {
-                background: #e94560;
+        logout_btn.setFixedHeight(DT.BUTTON_HEIGHT_MD)
+        logout_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {StyleSheets.gradient_danger()};
                 color: white;
-                padding: 12px 20px;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover { background: #c73e54; }
+                padding: {DT.SPACE_MD}px {DT.SPACE_LG}px;
+                border-radius: {DT.RADIUS_MD}px;
+                font-weight: {DT.WEIGHT_BOLD};
+                font-size: {DT.FONT_BASE}px;
+                font-family: {DT.FONT_FAMILY};
+                border: none;
+            }}
+            QPushButton:hover {{
+                background: {StyleSheets.gradient_danger_hover()};
+            }}
         """)
         logout_btn.clicked.connect(self._handle_logout)
         account_layout.addWidget(logout_btn)
-        
+
         layout.addWidget(account_group)
-        
+
         # Model Sync section
         sync_group = QGroupBox("Model Sync")
-        sync_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-top: 10px; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }")
         sync_layout = QVBoxLayout(sync_group)
-        
+
         refresh_btn = QPushButton("🔄 Refresh Models from Cloud")
-        refresh_btn.setStyleSheet("""
-            QPushButton {
-                background: #06b6d4;
+        refresh_btn.setFixedHeight(DT.BUTTON_HEIGHT_MD)
+        refresh_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {StyleSheets.gradient_primary()};
                 color: white;
-                padding: 12px 20px;
-                border-radius: 6px;
-                font-weight: bold;
-                font-size: 14px;
-            }
-            QPushButton:hover { background: #0891b2; }
+                padding: {DT.SPACE_MD}px {DT.SPACE_LG}px;
+                border-radius: {DT.RADIUS_MD}px;
+                font-weight: {DT.WEIGHT_BOLD};
+                font-size: {DT.FONT_BASE}px;
+                font-family: {DT.FONT_FAMILY};
+                border: none;
+            }}
+            QPushButton:hover {{
+                background: {StyleSheets.gradient_primary_hover()};
+            }}
         """)
         refresh_btn.clicked.connect(self._refresh_models_from_cloud)
         sync_layout.addWidget(refresh_btn)
-        
+
         self.sync_status_label = QLabel("Last sync: Never")
-        self.sync_status_label.setStyleSheet("color: #94a3b8; font-size: 12px;")
+        self.sync_status_label.setStyleSheet(f"""
+            color: {DT.TEXT_DISABLED};
+            font-size: {DT.FONT_SM}px;
+            font-family: {DT.FONT_FAMILY};
+        """)
         sync_layout.addWidget(self.sync_status_label)
-        
+
         layout.addWidget(sync_group)
-        
+
         # MT5 connection
         mt5_group = QGroupBox("MT5 Connection")
-        mt5_group.setStyleSheet("QGroupBox { color: #fff; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin-top: 10px; } QGroupBox::title { subcontrol-origin: margin; left: 10px; padding: 0 5px; }")
         mt5_layout = QGridLayout(mt5_group)
-        
-        mt5_layout.addWidget(QLabel("Login:"), 0, 0)
+
+        # MT5 labels
+        login_label = QLabel("Login:")
+        login_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; font-family: {DT.FONT_FAMILY};")
+        mt5_layout.addWidget(login_label, 0, 0)
+
         self.mt5_login = QLineEdit()
-        self.mt5_login.setStyleSheet("background: #16213e; color: #fff; padding: 8px; border-radius: 4px;")
+        self.mt5_login.setFixedHeight(DT.INPUT_HEIGHT)
         mt5_layout.addWidget(self.mt5_login, 0, 1)
-        
-        mt5_layout.addWidget(QLabel("Password:"), 1, 0)
+
+        password_label = QLabel("Password:")
+        password_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; font-family: {DT.FONT_FAMILY};")
+        mt5_layout.addWidget(password_label, 1, 0)
+
         self.mt5_password = QLineEdit()
         self.mt5_password.setEchoMode(QLineEdit.EchoMode.Password)
-        self.mt5_password.setStyleSheet("background: #16213e; color: #fff; padding: 8px; border-radius: 4px;")
+        self.mt5_password.setFixedHeight(DT.INPUT_HEIGHT)
         mt5_layout.addWidget(self.mt5_password, 1, 1)
-        
-        mt5_layout.addWidget(QLabel("Server:"), 2, 0)
+
+        server_label = QLabel("Server:")
+        server_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; font-family: {DT.FONT_FAMILY};")
+        mt5_layout.addWidget(server_label, 2, 0)
+
         self.mt5_server = QLineEdit()
-        self.mt5_server.setStyleSheet("background: #16213e; color: #fff; padding: 8px; border-radius: 4px;")
+        self.mt5_server.setFixedHeight(DT.INPUT_HEIGHT)
         mt5_layout.addWidget(self.mt5_server, 2, 1)
-        
+
         connect_btn = QPushButton("Connect to MT5")
-        connect_btn.setStyleSheet("background: #4ecca3; color: #000; padding: 10px; border-radius: 5px; font-weight: bold;")
+        connect_btn.setFixedHeight(DT.BUTTON_HEIGHT_MD)
+        connect_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: {DT.SUCCESS};
+                color: white;
+                padding: {DT.SPACE_MD}px {DT.SPACE_LG}px;
+                border-radius: {DT.RADIUS_MD}px;
+                font-weight: {DT.WEIGHT_BOLD};
+                font-family: {DT.FONT_FAMILY};
+                border: none;
+            }}
+            QPushButton:hover {{
+                background: {DT.SUCCESS_DARK};
+            }}
+        """)
         connect_btn.clicked.connect(self._connect_mt5)
         mt5_layout.addWidget(connect_btn, 3, 0, 1, 2)
-        
+
         layout.addWidget(mt5_group)
         layout.addStretch()
-        
+
         return page
     
     def _handle_logout(self):
@@ -781,44 +792,47 @@ class MainWindow(QMainWindow):
         threading.Thread(target=do_sync, daemon=True).start()
     
     def _create_stat_card(self, title: str, value: str, color: str) -> tuple:
-        """Create a statistics card - Modern glassmorphism style"""
+        """Create a statistics card with design system"""
         card = QFrame()
-        card.setFixedHeight(130)
+        card.setFixedHeight(DT.CARD_MIN_HEIGHT)
         card.setStyleSheet(f"""
             QFrame {{
-                background: qlineargradient(
-                    x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(30, 41, 59, 0.8), stop:1 rgba(15, 23, 42, 0.6)
-                );
-                border: 1px solid rgba(6, 182, 212, 0.2);
+                background: {DT.GLASS_MEDIUM};
+                border: 1px solid {DT.BORDER_DEFAULT};
                 border-left: 4px solid {color};
-                border-radius: 16px;
+                border-radius: {DT.RADIUS_2XL}px;
             }}
         """)
-        
+
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(24, 20, 24, 20)
-        layout.setSpacing(8)
-        
+        layout.setContentsMargins(DT.SPACE_XL, DT.SPACE_LG, DT.SPACE_XL, DT.SPACE_LG)
+        layout.setSpacing(DT.SPACE_SM)
+
         title_label = QLabel(title)
-        title_label.setStyleSheet("color: #94a3b8; font-size: 13px; font-weight: 500; background: transparent;")
+        title_label.setStyleSheet(f"""
+            color: {DT.TEXT_DISABLED};
+            font-size: {DT.FONT_SM}px;
+            font-weight: {DT.WEIGHT_MEDIUM};
+            font-family: {DT.FONT_FAMILY};
+            background: transparent;
+        """)
         layout.addWidget(title_label)
-        
+
         value_label = QLabel(value)
-        value_label.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
+        value_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_3XL, DT.WEIGHT_BOLD))
         value_label.setStyleSheet(f"color: {color}; background: transparent;")
         layout.addWidget(value_label)
-        
+
         layout.addStretch()
-        
+
         return card, value_label
     
     def _create_status_bar(self):
         """Create the status bar"""
         status_bar = QStatusBar()
-        status_bar.setStyleSheet("QStatusBar { background-color: #0f0f1a; color: #888; font-size: 11px; }")
+        # Status bar style inherited from global stylesheet
         self.setStatusBar(status_bar)
-        
+
         self.api_status = QLabel("API: Running on 127.0.0.1:8765")
         status_bar.addPermanentWidget(self.api_status)
     
@@ -837,13 +851,13 @@ class MainWindow(QMainWindow):
     def _check_mt5_connection(self):
         """Check MT5 connection status and sync to Supabase"""
         is_connected = self.mt5_client.is_connected
-        
+
         if is_connected:
             self.mt5_status_label.setText("MT5: Connected ✓")
-            self.mt5_status_label.setStyleSheet("color: #4ecca3; padding: 15px; font-size: 11px;")
+            self.mt5_status_label.setStyleSheet(f"color: {DT.SUCCESS}; padding: {DT.SPACE_MD}px; font-size: {DT.FONT_XS}px; font-family: {DT.FONT_FAMILY};")
         else:
             self.mt5_status_label.setText("MT5: Disconnected")
-            self.mt5_status_label.setStyleSheet("color: #ff6b6b; padding: 15px; font-size: 11px;")
+            self.mt5_status_label.setStyleSheet(f"color: {DT.DANGER}; padding: {DT.SPACE_MD}px; font-size: {DT.FONT_XS}px; font-family: {DT.FONT_FAMILY};")
         
         self.mt5_status_changed.emit(is_connected)
         
@@ -890,9 +904,9 @@ class MainWindow(QMainWindow):
             self.stat_values['balance'].setText(f"${account.balance:,.2f}")
             self.stat_values['profit'].setText(f"${account.profit:,.2f}")
             if account.profit >= 0:
-                self.stat_values['profit'].setStyleSheet("color: #4ecca3; font-size: 20px; font-weight: bold;")
+                self.stat_values['profit'].setStyleSheet(f"color: {DT.SUCCESS}; font-size: {DT.FONT_2XL}px; font-weight: {DT.WEIGHT_BOLD}; font-family: {DT.FONT_FAMILY};")
             else:
-                self.stat_values['profit'].setStyleSheet("color: #e94560; font-size: 20px; font-weight: bold;")
+                self.stat_values['profit'].setStyleSheet(f"color: {DT.DANGER}; font-size: {DT.FONT_2XL}px; font-weight: {DT.WEIGHT_BOLD}; font-family: {DT.FONT_FAMILY};")
         
         # Update positions table
         positions = self.mt5_client.get_positions()
@@ -907,7 +921,7 @@ class MainWindow(QMainWindow):
             self.position_table.setItem(i, 4, QTableWidgetItem(f"{pos.current_price:.5f}"))
             
             profit_item = QTableWidgetItem(f"${pos.profit:.2f}")
-            profit_item.setForeground(QColor("#4ecca3" if pos.profit >= 0 else "#e94560"))
+            profit_item.setForeground(QColor(DT.SUCCESS if pos.profit >= 0 else DT.DANGER))
             self.position_table.setItem(i, 5, profit_item)
             
             self.position_table.setItem(i, 6, QTableWidgetItem(pos.open_time.strftime("%H:%M:%S")))
@@ -955,7 +969,7 @@ class MainWindow(QMainWindow):
         
         if self.auto_trader.load_model(model_id, symbol, config):
             self.signal_labels[symbol].setText("LOADED")
-            self.signal_labels[symbol].setStyleSheet("color: #4ecca3; padding: 20px;")
+            self.signal_labels[symbol].setStyleSheet(f"color: {DT.SUCCESS}; padding: {DT.SPACE_LG}px; font-family: {DT.FONT_FAMILY};")
             QMessageBox.information(self, "Success", f"Model loaded for {symbol}")
         else:
             QMessageBox.warning(self, "Error", f"Failed to load model for {symbol}")
@@ -1004,7 +1018,7 @@ class MainWindow(QMainWindow):
         self.start_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
         self.trading_status_label.setText("Auto: RUNNING")
-        self.trading_status_label.setStyleSheet("color: #4ecca3; padding: 15px; font-size: 11px;")
+        self.trading_status_label.setStyleSheet(f"color: {DT.SUCCESS}; padding: {DT.SPACE_MD}px; font-size: {DT.FONT_XS}px; font-family: {DT.FONT_FAMILY};")
     
     def _stop_auto_trading(self):
         """Stop auto trading"""
@@ -1016,20 +1030,20 @@ class MainWindow(QMainWindow):
         self.start_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
         self.trading_status_label.setText("Auto: Stopped")
-        self.trading_status_label.setStyleSheet("color: #888; padding: 15px; font-size: 11px;")
+        self.trading_status_label.setStyleSheet(f"color: {DT.TEXT_DISABLED}; padding: {DT.SPACE_MD}px; font-size: {DT.FONT_XS}px; font-family: {DT.FONT_FAMILY};")
     
     def _on_signal(self, symbol: str, signal: str, confidence: float):
         """Handle signal from auto trader"""
         if symbol in self.signal_labels:
             label = self.signal_labels[symbol]
             label.setText(f"{signal.upper()}\n{confidence:.0%}")
-            
+
             if signal == "buy":
-                label.setStyleSheet("color: #4ecca3; padding: 20px; font-size: 24px;")
+                label.setStyleSheet(f"color: {DT.SUCCESS}; padding: {DT.SPACE_LG}px; font-size: {DT.FONT_3XL}px; font-family: {DT.FONT_FAMILY};")
             elif signal == "sell":
-                label.setStyleSheet("color: #e94560; padding: 20px; font-size: 24px;")
+                label.setStyleSheet(f"color: {DT.DANGER}; padding: {DT.SPACE_LG}px; font-size: {DT.FONT_3XL}px; font-family: {DT.FONT_FAMILY};")
             else:
-                label.setStyleSheet("color: #888; padding: 20px; font-size: 24px;")
+                label.setStyleSheet(f"color: {DT.TEXT_DISABLED}; padding: {DT.SPACE_LG}px; font-size: {DT.FONT_3XL}px; font-family: {DT.FONT_FAMILY};")
         
         # Add to log
         row = self.log_table.rowCount()
