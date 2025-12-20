@@ -141,13 +141,16 @@ class MainWindow(QMainWindow):
         self._apply_styles()
     
     def _create_sidebar(self) -> QFrame:
-        """Create the sidebar navigation"""
+        """Create the sidebar navigation - Modern glassmorphism"""
         sidebar = QFrame()
-        sidebar.setFixedWidth(220)
+        sidebar.setFixedWidth(240)
         sidebar.setStyleSheet("""
             QFrame {
-                background-color: #16213e;
-                border-right: 1px solid #0f3460;
+                background: qlineargradient(
+                    x1:0, y1:0, x2:0, y2:1,
+                    stop:0 rgba(15, 23, 42, 0.95), stop:1 rgba(30, 41, 59, 0.9)
+                );
+                border-right: 1px solid rgba(6, 182, 212, 0.15);
             }
         """)
         
@@ -155,69 +158,128 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         
-        # Logo
+        # Logo section with gradient
         logo_frame = QFrame()
-        logo_frame.setFixedHeight(80)
+        logo_frame.setFixedHeight(90)
+        logo_frame.setStyleSheet("""
+            QFrame {
+                background: transparent;
+                border-bottom: 1px solid rgba(6, 182, 212, 0.15);
+            }
+        """)
         logo_layout = QHBoxLayout(logo_frame)
+        logo_layout.setContentsMargins(24, 0, 24, 0)
         
-        logo_label = QLabel("NexusTrade")
+        logo_label = QLabel("⚡ NexusTrade")
         logo_label.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
-        logo_label.setStyleSheet("color: #e94560; padding: 20px;")
+        logo_label.setStyleSheet("""
+            color: qlineargradient(
+                x1:0, y1:0, x2:1, y2:0,
+                stop:0 #06b6d4, stop:1 #14b8a6
+            );
+            background: transparent;
+        """)
         logo_layout.addWidget(logo_label)
         
         layout.addWidget(logo_frame)
         
-        # Navigation
+        # Navigation section
+        nav_frame = QFrame()
+        nav_frame.setStyleSheet("background: transparent;")
+        nav_layout = QVBoxLayout(nav_frame)
+        nav_layout.setContentsMargins(12, 20, 12, 20)
+        nav_layout.setSpacing(6)
+        
         nav_items = [
-            ("📊 Dashboard", 0),
-            ("📈 Auto Trading", 1),
-            ("🤖 ML Models", 2),
-            ("🎯 Strategy Builder", 3),
-            ("⚙️ Settings", 4),
+            ("📊", "Dashboard", 0),
+            ("📈", "Auto Trading", 1),
+            ("🤖", "ML Models", 2),
+            ("🎯", "Strategy Builder", 3),
+            ("⚙️", "Settings", 4),
         ]
         
         self.nav_buttons = []
-        for name, index in nav_items:
-            btn = self._create_nav_button(name, index)
-            layout.addWidget(btn)
+        for icon, name, index in nav_items:
+            btn = self._create_nav_button(icon, name, index)
+            nav_layout.addWidget(btn)
             self.nav_buttons.append(btn)
         
+        layout.addWidget(nav_frame)
         layout.addStretch()
         
-        # MT5 status
-        self.mt5_status_label = QLabel("MT5: Disconnected")
-        self.mt5_status_label.setStyleSheet("color: #ff6b6b; padding: 15px; font-size: 11px;")
-        layout.addWidget(self.mt5_status_label)
+        # Status section
+        status_frame = QFrame()
+        status_frame.setStyleSheet("""
+            QFrame {
+                background: rgba(15, 23, 42, 0.5);
+                border-top: 1px solid rgba(6, 182, 212, 0.15);
+                padding: 16px;
+            }
+        """)
+        status_layout = QVBoxLayout(status_frame)
+        status_layout.setContentsMargins(20, 16, 20, 16)
+        status_layout.setSpacing(12)
         
-        # Auto trading status
+        # MT5 status with indicator
+        mt5_row = QHBoxLayout()
+        mt5_indicator = QLabel("●")
+        mt5_indicator.setStyleSheet("color: #ef4444; font-size: 10px;")
+        mt5_row.addWidget(mt5_indicator)
+        self.mt5_status_label = QLabel("MT5: Disconnected")
+        self.mt5_status_label.setStyleSheet("color: #94a3b8; font-size: 12px; font-weight: 500;")
+        mt5_row.addWidget(self.mt5_status_label)
+        mt5_row.addStretch()
+        status_layout.addLayout(mt5_row)
+        
+        # Save indicator reference for updating
+        self.mt5_indicator = mt5_indicator
+        
+        # Auto trading status with indicator
+        trading_row = QHBoxLayout()
+        trading_indicator = QLabel("●")
+        trading_indicator.setStyleSheet("color: #64748b; font-size: 10px;")
+        trading_row.addWidget(trading_indicator)
         self.trading_status_label = QLabel("Auto: Stopped")
-        self.trading_status_label.setStyleSheet("color: #888; padding: 15px; font-size: 11px;")
-        layout.addWidget(self.trading_status_label)
+        self.trading_status_label.setStyleSheet("color: #94a3b8; font-size: 12px; font-weight: 500;")
+        trading_row.addWidget(self.trading_status_label)
+        trading_row.addStretch()
+        status_layout.addLayout(trading_row)
+        
+        # Save indicator reference
+        self.trading_indicator = trading_indicator
+        
+        layout.addWidget(status_frame)
         
         return sidebar
     
-    def _create_nav_button(self, text: str, index: int) -> QPushButton:
-        """Create a navigation button"""
-        btn = QPushButton(text)
-        btn.setFixedHeight(50)
+    def _create_nav_button(self, icon: str, name: str, index: int) -> QPushButton:
+        """Create a navigation button - Modern style"""
+        btn = QPushButton(f"  {icon}   {name}")
+        btn.setFixedHeight(48)
         btn.setCursor(Qt.CursorShape.PointingHandCursor)
         btn.setStyleSheet("""
             QPushButton {
-                background-color: transparent;
-                color: #a0a0a0;
+                background: transparent;
+                color: #94a3b8;
                 border: none;
+                border-radius: 10px;
                 text-align: left;
-                padding-left: 20px;
-                font-size: 13px;
+                padding-left: 16px;
+                font-size: 14px;
+                font-weight: 500;
             }
             QPushButton:hover {
-                background-color: #0f3460;
-                color: #ffffff;
+                background: rgba(6, 182, 212, 0.1);
+                color: #e2e8f0;
             }
             QPushButton:checked {
-                background-color: #0f3460;
-                color: #e94560;
-                border-left: 3px solid #e94560;
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 rgba(6, 182, 212, 0.2), stop:1 rgba(20, 184, 166, 0.1)
+                );
+                color: #06b6d4;
+                border-left: 3px solid #06b6d4;
+                font-weight: 600;
             }
         """)
         btn.setCheckable(True)
@@ -436,44 +498,45 @@ class MainWindow(QMainWindow):
         return page
     
     def _create_signal_card(self, symbol: str) -> QFrame:
-        """Create a signal display card for a symbol"""
+        """Create a signal display card for a symbol - Modern style"""
         card = QFrame()
         card.setStyleSheet("""
             QFrame {
-                background-color: #16213e;
-                border-radius: 10px;
-                border: 1px solid #0f3460;
-                padding: 20px;
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(30, 41, 59, 0.8), stop:1 rgba(15, 23, 42, 0.6)
+                );
+                border: 1px solid rgba(6, 182, 212, 0.2);
+                border-radius: 16px;
             }
         """)
         
         layout = QVBoxLayout(card)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
         
-        # Symbol header
-        sym_label = QLabel(symbol)
+        # Symbol header with icon
+        sym_label = QLabel(f"📊 {symbol}")
         sym_label.setFont(QFont("Segoe UI", 18, QFont.Weight.Bold))
-        sym_label.setStyleSheet("color: #fff;")
+        sym_label.setStyleSheet("color: #f8fafc; background: transparent;")
         layout.addWidget(sym_label)
         
         # Signal indicator
         signal_label = QLabel("WAITING")
-        signal_label.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
+        signal_label.setFont(QFont("Segoe UI", 28, QFont.Weight.Bold))
         signal_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        signal_label.setStyleSheet("color: #888; padding: 20px;")
+        signal_label.setStyleSheet("""
+            color: #64748b;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            padding: 24px;
+        """)
         layout.addWidget(signal_label)
         self.signal_labels[symbol] = signal_label
         
         # Load model button
-        load_btn = QPushButton(f"Load {symbol} Model")
-        load_btn.setStyleSheet("""
-            QPushButton {
-                background-color: #0f3460;
-                color: #fff;
-                padding: 10px;
-                border-radius: 5px;
-            }
-            QPushButton:hover { background-color: #1a4a80; }
-        """)
+        load_btn = QPushButton(f"🔄 Load {symbol} Model")
+        load_btn.setObjectName("loadModelBtn")
         load_btn.clicked.connect(lambda: self._load_model(symbol))
         layout.addWidget(load_btn)
         
@@ -707,28 +770,35 @@ class MainWindow(QMainWindow):
         threading.Thread(target=do_sync, daemon=True).start()
     
     def _create_stat_card(self, title: str, value: str, color: str) -> tuple:
-        """Create a statistics card, return (card, value_label)"""
+        """Create a statistics card - Modern glassmorphism style"""
         card = QFrame()
-        card.setFixedHeight(120)
+        card.setFixedHeight(130)
         card.setStyleSheet(f"""
             QFrame {{
-                background-color: #16213e;
-                border-radius: 10px;
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(30, 41, 59, 0.8), stop:1 rgba(15, 23, 42, 0.6)
+                );
+                border: 1px solid rgba(6, 182, 212, 0.2);
                 border-left: 4px solid {color};
+                border-radius: 16px;
             }}
         """)
         
         layout = QVBoxLayout(card)
-        layout.setContentsMargins(20, 15, 20, 15)
+        layout.setContentsMargins(24, 20, 24, 20)
+        layout.setSpacing(8)
         
         title_label = QLabel(title)
-        title_label.setStyleSheet("color: #888; font-size: 12px;")
+        title_label.setStyleSheet("color: #94a3b8; font-size: 13px; font-weight: 500; background: transparent;")
         layout.addWidget(title_label)
         
         value_label = QLabel(value)
-        value_label.setFont(QFont("Segoe UI", 20, QFont.Weight.Bold))
-        value_label.setStyleSheet(f"color: {color};")
+        value_label.setFont(QFont("Segoe UI", 24, QFont.Weight.Bold))
+        value_label.setStyleSheet(f"color: {color}; background: transparent;")
         layout.addWidget(value_label)
+        
+        layout.addStretch()
         
         return card, value_label
     
@@ -971,10 +1041,220 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Error: {error}", 5000)
     
     def _apply_styles(self):
-        """Apply global styles"""
+        """Apply global styles - Modern glassmorphism design"""
         self.setStyleSheet("""
-            QMainWindow { background-color: #1a1a2e; }
-            QLabel { color: #ffffff; }
+            /* Main Window */
+            QMainWindow {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:1,
+                    stop:0 #0f172a, stop:1 #1e3a8a
+                );
+            }
+            
+            /* Labels */
+            QLabel {
+                color: #ffffff;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            
+            /* Group Boxes - Glassmorphism */
+            QGroupBox {
+                background: rgba(30, 41, 59, 0.6);
+                border: 1px solid rgba(6, 182, 212, 0.2);
+                border-radius: 16px;
+                margin-top: 16px;
+                padding: 20px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #e2e8f0;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 20px;
+                padding: 0 10px;
+                color: #f8fafc;
+            }
+            
+            /* Tables */
+            QTableWidget {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(6, 182, 212, 0.2);
+                border-radius: 12px;
+                gridline-color: rgba(6, 182, 212, 0.1);
+                color: #f8fafc;
+                selection-background-color: rgba(6, 182, 212, 0.3);
+            }
+            QTableWidget::item {
+                padding: 12px;
+                border-bottom: 1px solid rgba(6, 182, 212, 0.1);
+            }
+            QTableWidget::item:alternate {
+                background: rgba(30, 41, 59, 0.4);
+            }
+            QTableWidget::item:hover {
+                background: rgba(6, 182, 212, 0.15);
+            }
+            QHeaderView::section {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:0, y2:1,
+                    stop:0 rgba(6, 182, 212, 0.2), stop:1 rgba(6, 182, 212, 0.1)
+                );
+                color: #94a3b8;
+                padding: 12px 16px;
+                border: none;
+                border-bottom: 2px solid rgba(6, 182, 212, 0.3);
+                font-weight: 600;
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+            
+            /* Primary Buttons - Gradient */
+            QPushButton[class="primary"], QPushButton#startBtn {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #06b6d4, stop:1 #14b8a6
+                );
+                border: none;
+                border-radius: 10px;
+                padding: 14px 28px;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton[class="primary"]:hover, QPushButton#startBtn:hover {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #0891b2, stop:1 #0d9488
+                );
+            }
+            
+            /* Danger Buttons */
+            QPushButton[class="danger"], QPushButton#stopBtn {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #f43f5e, stop:1 #e11d48
+                );
+                border: none;
+                border-radius: 10px;
+                padding: 14px 28px;
+                color: white;
+                font-weight: bold;
+                font-size: 14px;
+            }
+            QPushButton[class="danger"]:hover, QPushButton#stopBtn:hover {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #e11d48, stop:1 #be123c
+                );
+            }
+            
+            /* Secondary Buttons */
+            QPushButton {
+                background: rgba(30, 41, 59, 0.8);
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                border-radius: 8px;
+                padding: 10px 20px;
+                color: #e2e8f0;
+                font-weight: 600;
+                font-size: 13px;
+            }
+            QPushButton:hover {
+                background: rgba(6, 182, 212, 0.2);
+                border: 1px solid rgba(6, 182, 212, 0.5);
+                color: #06b6d4;
+            }
+            QPushButton:pressed {
+                background: rgba(6, 182, 212, 0.3);
+            }
+            QPushButton:disabled {
+                background: rgba(71, 85, 105, 0.5);
+                color: #64748b;
+                border: 1px solid rgba(100, 116, 139, 0.3);
+            }
+            
+            /* Input Fields */
+            QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(6, 182, 212, 0.3);
+                border-radius: 8px;
+                padding: 12px 16px;
+                color: #f8fafc;
+                font-size: 14px;
+                selection-background-color: rgba(6, 182, 212, 0.4);
+            }
+            QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
+                border: 2px solid #06b6d4;
+                background: rgba(15, 23, 42, 0.8);
+            }
+            QLineEdit::placeholder {
+                color: #64748b;
+            }
+            
+            /* Scrollbars */
+            QScrollBar:vertical {
+                background: rgba(15, 23, 42, 0.3);
+                width: 10px;
+                border-radius: 5px;
+                margin: 0;
+            }
+            QScrollBar::handle:vertical {
+                background: rgba(6, 182, 212, 0.4);
+                border-radius: 5px;
+                min-height: 30px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background: rgba(6, 182, 212, 0.6);
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0;
+            }
+            QScrollBar:horizontal {
+                background: rgba(15, 23, 42, 0.3);
+                height: 10px;
+                border-radius: 5px;
+            }
+            QScrollBar::handle:horizontal {
+                background: rgba(6, 182, 212, 0.4);
+                border-radius: 5px;
+                min-width: 30px;
+            }
+            
+            /* Progress Bar */
+            QProgressBar {
+                background: rgba(15, 23, 42, 0.6);
+                border: 1px solid rgba(6, 182, 212, 0.2);
+                border-radius: 8px;
+                text-align: center;
+                color: #f8fafc;
+                font-weight: 600;
+            }
+            QProgressBar::chunk {
+                background: qlineargradient(
+                    x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #06b6d4, stop:1 #14b8a6
+                );
+                border-radius: 7px;
+            }
+            
+            /* Status Bar */
+            QStatusBar {
+                background: rgba(15, 23, 42, 0.8);
+                border-top: 1px solid rgba(6, 182, 212, 0.2);
+                color: #94a3b8;
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            
+            /* Message Box */
+            QMessageBox {
+                background: #1e293b;
+            }
+            QMessageBox QLabel {
+                color: #f8fafc;
+            }
+            QMessageBox QPushButton {
+                min-width: 80px;
+            }
         """)
     
     def closeEvent(self, event):
