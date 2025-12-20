@@ -358,6 +358,47 @@ export default function DashboardPage() {
                             ))}
                         </div>
 
+                        {/* Quick Actions */}
+                        <div style={{ marginBottom: '2rem' }}>
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', color: '#fff' }}>
+                                Quick Actions
+                            </h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                                {/* Strategy Builder Card */}
+                                <Link href="/dashboard/strategy-builder" style={{ textDecoration: 'none' }}>
+                                    <div style={{
+                                        background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%)',
+                                        borderRadius: '1.25rem',
+                                        border: '1px solid rgba(6, 182, 212, 0.3)',
+                                        padding: '1.5rem',
+                                        backdropFilter: 'blur(16px)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s'
+                                    }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-4px)';
+                                            e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.5)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
+                                        }}
+                                    >
+                                        <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🎯</div>
+                                        <h4 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#fff', marginBottom: '0.5rem' }}>
+                                            AI Strategy Builder
+                                        </h4>
+                                        <p style={{ color: '#94a3b8', fontSize: '0.875rem', lineHeight: '1.5' }}>
+                                            Create custom trading strategies with AI-powered optimization
+                                        </p>
+                                        <div style={{ marginTop: '1rem', color: '#06b6d4', fontSize: '0.875rem', fontWeight: '500' }}>
+                                            Get Started →
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
+                        </div>
+
                         {/* Connection Card */}
                         <div style={{
                             background: 'rgba(30, 41, 59, 0.6)',
