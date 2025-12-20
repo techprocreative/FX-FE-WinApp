@@ -46,8 +46,8 @@ echo       Virtual environment activated
 
 REM Install dependencies
 echo [3/6] Installing dependencies...
-pip install --upgrade pip -q
-pip install -r requirements.txt -q
+python -m pip install --upgrade pip -q
+python -m pip install -r requirements.txt -q
 if errorlevel 1 (
     echo [ERROR] Failed to install dependencies
     goto :error
@@ -56,7 +56,7 @@ echo       Dependencies installed
 
 REM Install PyInstaller
 echo [4/6] Installing PyInstaller...
-pip install pyinstaller -q
+python -m pip install pyinstaller -q
 if errorlevel 1 (
     echo [ERROR] Failed to install PyInstaller
     goto :error
