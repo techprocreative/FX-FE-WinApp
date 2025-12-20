@@ -602,6 +602,37 @@ export default function DashboardPage() {
                                     {subscription?.tier || 'Free'} Tier
                                 </div>
                             </div>
+
+                            {/* LLM Usage */}
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#e2e8f0' }}>
+                                    AI Strategy Generations
+                                </label>
+                                <div style={{
+                                    padding: '0.875rem 1rem',
+                                    background: 'rgba(15, 23, 42, 0.6)',
+                                    border: '1px solid rgba(6, 182, 212, 0.2)',
+                                    borderRadius: '0.75rem',
+                                    fontSize: '1rem'
+                                }}>
+                                    {subscription?.tier === 'free' || !subscription ? (
+                                        <div>
+                                            <p style={{ color: '#06b6d4', fontWeight: '600', margin: 0 }}>
+                                                {/* TODO: Fetch actual usage */}
+                                                0/10 used this month
+                                            </p>
+                                            <p style={{ color: '#94a3b8', fontSize: '0.75rem', marginTop: '0.5rem', marginBottom: 0 }}>
+                                                Upgrade to Pro for unlimited AI generations
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <p style={{ color: '#10b981', fontWeight: '600', margin: 0 }}>
+                                            ∞ Unlimited
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
                             <Link href="/" style={{
                                 display: 'inline-block',
                                 padding: '0.875rem 1.5rem',
@@ -614,7 +645,7 @@ export default function DashboardPage() {
                                 fontSize: '0.9375rem',
                                 boxShadow: '0 4px 20px rgba(6, 182, 212, 0.3)'
                             }}>
-                                Upgrade to Pro
+                                {subscription?.tier === 'free' || !subscription ? 'Upgrade to Pro' : 'Manage Subscription'}
                             </Link>
                         </div>
                     </div>
