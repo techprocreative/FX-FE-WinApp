@@ -91,8 +91,8 @@ class Config:
         # Hardcoded Supabase credentials (same as frontend)
         # Users don't need to configure this - they just login with email/password
         self.supabase = SupabaseConfig(
-            url="https://xjqyqzqbfhxqxmhqxmhq.supabase.co",  # TODO: Replace with actual project URL
-            anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."  # TODO: Replace with actual anon key
+            url="https://jptguprshffbsthbeebe.supabase.co",
+            anon_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpwdGd1cHJzaGZmYnN0aGJlZWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxOTk1NzksImV4cCI6MjA4MTc3NTU3OX0.xuqKeVrqfIRcOSQgmuIgpaegy3hgiC2GS7iq5XVRHzU"
         )
         
         logger.info(f"✓ Supabase configured")
@@ -105,7 +105,7 @@ class Config:
         self.api_server.host = os.getenv("API_HOST", "127.0.0.1")
         self.api_server.port = int(os.getenv("API_PORT", "8765"))
 
-        logger.info(f"✓ Supabase URL: {supabase_url[:30]}...")
+        logger.info(f"✓ Supabase URL: {self.supabase.url[:30]}...")
         logger.info(f"✓ API Host: {self.api_server.host}")
         logger.info(f"✓ API Port: {self.api_server.port}")
     
