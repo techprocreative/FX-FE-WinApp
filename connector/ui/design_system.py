@@ -27,27 +27,118 @@ class DesignTokens:
         return 1920, 1080
 
     @classmethod
-    def get_responsive_window_size(cls):
-        """Calculate responsive window size based on screen"""
+    def get_screen_tier(cls):
+        """
+        Determine screen size tier for responsive layouts
+
+        Returns:
+            str: 'small' (≤1024), 'medium' (1025-1600), or 'large' (>1600)
+        """
         screen_w, screen_h = cls.get_screen_size()
 
-        # Use 85% of screen size, but with sensible min/max bounds
-        target_w = int(screen_w * 0.85)
-        target_h = int(screen_h * 0.85)
+        if screen_w <= 1024:
+            return 'small'
+        elif screen_w <= 1600:
+            return 'medium'
+        else:
+            return 'large'
 
-        # Minimum sizes (for very small screens)
-        min_w = 1200
-        min_h = 700
+    @classmethod
+    def get_responsive_window_size(cls):
+        """Calculate responsive window size based on screen tier"""
+        screen_w, screen_h = cls.get_screen_size()
+        tier = cls.get_screen_tier()
 
-        # Maximum sizes (for very large screens like 4K)
-        max_w = 1920
-        max_h = 1200
+        if tier == 'small':
+            # For 1024x768 and similar - use almost full screen
+            target_w = int(screen_w * 0.95)  # 95% to leave some taskbar space
+            target_h = int(screen_h * 0.90)
+
+            # Minimum for small screens
+            min_w = 960   # Reduced from 1200
+            min_h = 650   # Reduced from 700
+
+            # Maximum for small screens
+            max_w = 1024
+            max_h = 768
+
+        elif tier == 'medium':
+            # For 1366x768, 1440x900 - use comfortable percentage
+            target_w = int(screen_w * 0.90)
+            target_h = int(screen_h * 0.88)
+
+            # Minimum/Maximum for medium screens
+            min_w = 1100
+            min_h = 680
+            max_w = 1600
+            max_h = 1000
+
+        else:  # large
+            # For 1920x1080 and larger - use smaller percentage
+            target_w = int(screen_w * 0.75)  # Don't need full screen on large monitors
+            target_h = int(screen_h * 0.80)
+
+            # Minimum/Maximum for large screens
+            min_w = 1400
+            min_h = 800
+            max_w = 1920
+            max_h = 1200
 
         # Clamp values
         width = max(min_w, min(target_w, max_w))
         height = max(min_h, min(target_h, max_h))
 
         return width, height
+
+    @classmethod
+    def get_responsive_sidebar_width(cls):
+        """Get sidebar width based on screen tier"""
+        tier = cls.get_screen_tier()
+
+        if tier == 'small':
+            return 220  # Narrower sidebar for small screens
+        elif tier == 'medium':
+            return 250
+        else:
+            return 280  # Original width for large screens
+
+    @classmethod
+    def get_responsive_card_sizes(cls):
+        """
+        Get responsive card minimum sizes based on screen tier
+
+        Returns:
+            dict: {'stat_card': (width, height), 'signal_card': (width, height)}
+        """
+        tier = cls.get_screen_tier()
+
+        if tier == 'small':
+            return {
+                'stat_card': (150, 100),     # Smaller cards
+                'signal_card': (260, 240)     # Reduced from 320x280
+            }
+        elif tier == 'medium':
+            return {
+                'stat_card': (170, 110),
+                'signal_card': (300, 260)
+            }
+        else:  # large
+            return {
+                'stat_card': (180, 120),     # Original sizes
+                'signal_card': (320, 280)
+            }
+
+    @classmethod
+    def get_responsive_spacing(cls):
+        """Get responsive spacing multiplier based on screen tier"""
+        tier = cls.get_screen_tier()
+
+        if tier == 'small':
+            return 0.75  # Reduce spacing by 25% on small screens
+        elif tier == 'medium':
+            return 0.9   # Reduce spacing by 10% on medium screens
+        else:
+            return 1.0   # Original spacing on large screens
 
     # ============================================
     # COLOR PALETTE

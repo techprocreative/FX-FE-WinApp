@@ -160,8 +160,18 @@ class MainWindow(QMainWindow):
         """Setup the main UI with design system"""
         self.setWindowTitle("NexusTrade - Forex Trading Platform")
 
-        # Set minimum size (absolute minimum for usability)
-        self.setMinimumSize(DT.MAIN_MIN_WIDTH, DT.MAIN_MIN_HEIGHT)
+        # Get screen tier for responsive min sizes
+        tier = DT.get_screen_tier()
+
+        if tier == 'small':
+            min_w, min_h = 960, 650
+        elif tier == 'medium':
+            min_w, min_h = 1100, 680
+        else:
+            min_w, min_h = 1200, 700
+
+        # Set minimum size based on screen tier
+        self.setMinimumSize(min_w, min_h)
 
         # Set responsive initial size based on screen
         responsive_w, responsive_h = DT.get_responsive_window_size()
@@ -199,7 +209,8 @@ class MainWindow(QMainWindow):
     def _create_sidebar(self) -> QFrame:
         """Create the sidebar navigation with design system"""
         sidebar = QFrame()
-        sidebar.setFixedWidth(DT.SIDEBAR_WIDTH)
+        sidebar_width = DT.get_responsive_sidebar_width()
+        sidebar.setFixedWidth(sidebar_width)
         sidebar.setStyleSheet(f"""
             QFrame {{
                 background: {StyleSheets.gradient_sidebar()};
@@ -406,8 +417,14 @@ class MainWindow(QMainWindow):
         """Dashboard with account stats"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
-        layout.setSpacing(DT.SPACE_LG)
+
+        # Get responsive spacing
+        spacing_mult = DT.get_responsive_spacing()
+        margin = int(DT.SPACE_2XL * spacing_mult)
+        spacing = int(DT.SPACE_LG * spacing_mult)
+
+        layout.setContentsMargins(margin, margin, margin, margin)
+        layout.setSpacing(spacing)
 
         # Header
         header = QLabel("Dashboard")
@@ -417,7 +434,7 @@ class MainWindow(QMainWindow):
 
         # Stats cards
         cards_layout = QHBoxLayout()
-        cards_layout.setSpacing(DT.SPACE_LG)
+        cards_layout.setSpacing(spacing)  # Use responsive spacing
 
         stats = [
             ("balance", "Account Balance", "$0.00", DT.SUCCESS),
@@ -454,8 +471,14 @@ class MainWindow(QMainWindow):
         """Auto trading control page - Enhanced dashboard"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
-        layout.setSpacing(DT.SPACE_LG)
+
+        # Get responsive spacing
+        spacing_mult = DT.get_responsive_spacing()
+        margin = int(DT.SPACE_2XL * spacing_mult)
+        spacing = int(DT.SPACE_LG * spacing_mult)
+
+        layout.setContentsMargins(margin, margin, margin, margin)
+        layout.setSpacing(spacing)
 
         # Header
         header_layout = QHBoxLayout()
@@ -479,7 +502,7 @@ class MainWindow(QMainWindow):
         from ui.components.stat_card import StatCard
 
         stats_layout = QHBoxLayout()
-        stats_layout.setSpacing(DT.SPACE_LG)
+        stats_layout.setSpacing(spacing)  # Use responsive spacing
 
         # Create stat cards (will be updated dynamically)
         self.stat_card_trades = StatCard("📊", "TRADES TODAY", "0")
@@ -550,7 +573,7 @@ class MainWindow(QMainWindow):
         from ui.components.signal_card import SignalCard
 
         signals_layout = QHBoxLayout()
-        signals_layout.setSpacing(DT.SPACE_LG)
+        signals_layout.setSpacing(spacing)  # Use responsive spacing
 
         # Store SignalCard instances
         self.signal_cards = {}
@@ -641,8 +664,14 @@ class MainWindow(QMainWindow):
         """ML Models management page - Enhanced dashboard style"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
-        layout.setSpacing(DT.SPACE_LG)
+
+        # Get responsive spacing
+        spacing_mult = DT.get_responsive_spacing()
+        margin = int(DT.SPACE_2XL * spacing_mult)
+        spacing = int(DT.SPACE_LG * spacing_mult)
+
+        layout.setContentsMargins(margin, margin, margin, margin)
+        layout.setSpacing(spacing)
 
         # Header with action button
         header_layout = QHBoxLayout()
@@ -684,7 +713,7 @@ class MainWindow(QMainWindow):
         # Summary stats cards
         if models:
             stats_layout = QHBoxLayout()
-            stats_layout.setSpacing(DT.SPACE_LG)
+            stats_layout.setSpacing(spacing)  # Use responsive spacing
 
             # Import StatCard
             from ui.components.stat_card import StatCard
@@ -965,8 +994,14 @@ HWID Bound: {secured.hwid_hash[:16]}...
         """Settings page with account, MT5, and logout"""
         page = QWidget()
         layout = QVBoxLayout(page)
-        layout.setContentsMargins(DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL, DT.SPACE_2XL)
-        layout.setSpacing(DT.SPACE_LG)
+
+        # Get responsive spacing
+        spacing_mult = DT.get_responsive_spacing()
+        margin = int(DT.SPACE_2XL * spacing_mult)
+        spacing = int(DT.SPACE_LG * spacing_mult)
+
+        layout.setContentsMargins(margin, margin, margin, margin)
+        layout.setSpacing(spacing)
 
         header = QLabel("Settings")
         header.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_3XL, DT.WEIGHT_BOLD))

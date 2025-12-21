@@ -25,6 +25,10 @@ class SignalCard(QFrame):
 
     def _setup_ui(self):
         """Setup the card UI"""
+        # Get responsive card sizes
+        card_sizes = DT.get_responsive_card_sizes()
+        min_w, min_h = card_sizes['signal_card']
+
         # Card styling
         self.setStyleSheet(f"""
             QFrame {{
@@ -36,8 +40,8 @@ class SignalCard(QFrame):
                 border-radius: {DT.RADIUS_2XL}px;
             }}
         """)
-        self.setMinimumWidth(320)
-        self.setMinimumHeight(280)
+        self.setMinimumWidth(min_w)
+        self.setMinimumHeight(min_h)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(DT.SPACE_XL, DT.SPACE_XL, DT.SPACE_XL, DT.SPACE_XL)

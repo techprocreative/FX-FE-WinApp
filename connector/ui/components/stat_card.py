@@ -29,6 +29,10 @@ class StatCard(QFrame):
 
     def _setup_ui(self, icon: str, title: str, value: str, trend: str, trend_positive: bool):
         """Setup the card UI"""
+        # Get responsive card sizes
+        card_sizes = DT.get_responsive_card_sizes()
+        min_w, min_h = card_sizes['stat_card']
+
         # Card styling
         self.setStyleSheet(f"""
             QFrame {{
@@ -41,8 +45,8 @@ class StatCard(QFrame):
                 padding: {DT.SPACE_LG}px;
             }}
         """)
-        self.setMinimumWidth(180)
-        self.setMinimumHeight(120)
+        self.setMinimumWidth(min_w)
+        self.setMinimumHeight(min_h)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(DT.SPACE_BASE, DT.SPACE_BASE, DT.SPACE_BASE, DT.SPACE_BASE)
