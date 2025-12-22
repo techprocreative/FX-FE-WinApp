@@ -249,7 +249,7 @@ class MainWindow(QMainWindow):
             from trading.auto_trader import AutoTrader
             
             self.model_security = ModelSecurity()
-            self.auto_trader = AutoTrader(self.mt5_client)
+            self.auto_trader = AutoTrader(self.mt5_client, self.model_security)
             
     def _ensure_supabase_loaded(self):
         if not self.supabase_sync:
