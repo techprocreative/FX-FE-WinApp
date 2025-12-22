@@ -170,6 +170,9 @@ class DesignTokens:
     BG_DARK = "#1e293b"          # Slate 900
     BG_MEDIUM = "#1e3a8a"        # Blue 900 (for gradients)
     BG_CARD = "#334155"          # Slate 700
+    
+    # Aliases for backward compatibility
+    BACKGROUND_DARK = "#0f172a"  # Same as BG_DARKEST
 
     # Glass/Transparent Backgrounds
     GLASS_DARKEST = "rgba(15, 23, 42, 0.95)"
