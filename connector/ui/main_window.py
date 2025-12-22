@@ -948,7 +948,9 @@ HWID Bound: {secured.hwid_hash[:16]}...
         msg.exec()
 
     def _handle_model_load_from_card(self, model_id: str):
-        """Load model from ModelCard"""
+        """Load model from ModelCard - directly uses model_id instead of re-searching by symbol"""
+        self._ensure_ml_loaded()  # Ensure ML modules are loaded
+        
         # Find model info
         models = self.model_security.list_models_with_metadata()
         model_info = next((m for m in models if m['model_id'] == model_id), None)
@@ -958,12 +960,35 @@ HWID Bound: {secured.hwid_hash[:16]}...
             return
 
         symbol = model_info.get('symbol', '').upper()
-        if not symbol:
-            QMessageBox.warning(self, "Error", "Model has no associated symbol")
+        if not symbol or symbol == 'UNKNOWN':
+            QMessageBox.warning(self, "Error", "Model has no associated symbol. Please check model metadata.")
             return
 
-        # Load using existing _load_model method
-        self._load_model(symbol)
+        # Lazy import for TradingConfig
+        from trading.auto_trader import TradingConfig
+        config = TradingConfig(
+            symbol=symbol,
+            timeframe="M15",
+            volume=0.01,
+            risk_percent=1.0,
+            confidence_threshold=0.6
+        )
+        
+        # Load the specific model directly using model_id
+        if self.auto_trader.load_model(model_id, symbol, config):
+            # Update UI based on which display is available
+            if hasattr(self, 'signal_cards') and symbol in self.signal_cards:
+                accuracy = model_info.get('accuracy', 0.85)
+                self.signal_cards[symbol].set_model_loaded(model_id, accuracy)
+            elif hasattr(self, 'signal_labels') and symbol in self.signal_labels:
+                self.signal_labels[symbol].setText("LOADED")
+                self.signal_labels[symbol].setStyleSheet(f"color: {DT.SUCCESS}; padding: {DT.SPACE_LG}px; font-family: {DT.FONT_FAMILY};")
+            
+            QMessageBox.information(self, "Success", f"Model '{model_info.get('name', model_id)}' loaded for {symbol}")
+            # Refresh models page to show active status
+            self._refresh_models_page_ui()
+        else:
+            QMessageBox.warning(self, "Error", f"Failed to load model for {symbol}. Check if HWID matches.")
 
     def _refresh_models_page_ui(self):
         """Refresh the ML Models page UI with current models"""
