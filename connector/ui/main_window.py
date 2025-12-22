@@ -344,14 +344,20 @@ class MainWindow(QMainWindow):
                 
     def _refresh_models_from_cloud(self):
         self._ensure_supabase_loaded()
-        QMessageBox.information(self, "Sync", "Syncing models... (Check logs)")
-        # Run in thread ideally, but blocking for now as strictly requested
-        count = self.supabase_sync.fetch_user_models()
-        self.supabase_sync.download_model("all") # Or specific
-        QMessageBox.information(self, "Sync", f"Synced {count} models")
-        
-        if self._pages_loaded['models']:
-            self.content_stack.widget(1).refresh()
+        try:
+            models = self.supabase_sync.fetch_user_models()
+            downloaded_count = 0
+            for model in models:
+                result = self.supabase_sync.download_model(model)
+                if result:
+                    downloaded_count += 1
+            
+            QMessageBox.information(self, "Sync", f"Synced {len(models)} models, downloaded {downloaded_count}")
+            
+            if self._pages_loaded['models']:
+                self.content_stack.widget(1).refresh()
+        except Exception as e:
+            QMessageBox.warning(self, "Sync Error", f"Failed to sync: {e}")
             
     def _train_models_placeholder(self):
         QMessageBox.information(self, "Train", "Training feature coming soon!")

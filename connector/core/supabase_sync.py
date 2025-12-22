@@ -29,7 +29,7 @@ class SupabaseModelSync:
             self.client.auth.set_session(access_token, access_token)
             logger.info("Supabase client authenticated with access token")
     
-    async def fetch_user_models(self) -> List[Dict[str, Any]]:
+    def fetch_user_models(self) -> List[Dict[str, Any]]:
         """Fetch all active models for the current user"""
         try:
             response = (self.client.table('ml_models')
@@ -45,7 +45,7 @@ class SupabaseModelSync:
             logger.error(f"Failed to fetch models: {e}")
             return []
     
-    async def download_model(self, model_metadata: Dict[str, Any]) -> Optional[Path]:
+    def download_model(self, model_metadata: Dict[str, Any]) -> Optional[Path]:
         """Download model file from Supabase Storage"""
         try:
             model_id = model_metadata['id']
@@ -82,7 +82,7 @@ class SupabaseModelSync:
             logger.error(f"Failed to download model: {e}")
             return None
     
-    async def upload_model(
+    def upload_model(
         self,
         model_path: Path,
         metadata: Dict[str, Any]
@@ -144,7 +144,7 @@ class SupabaseModelSync:
             logger.error(f"Failed to upload model: {e}")
             return None
     
-    async def update_model_status(self, model_id: str, is_active: bool):
+    def update_model_status(self, model_id: str, is_active: bool):
         """Update model active status"""
         try:
             (self.client.table('ml_models')
@@ -156,7 +156,7 @@ class SupabaseModelSync:
         except Exception as e:
             logger.error(f"Failed to update model status: {e}")
     
-    async def update_last_used(self, model_id: str):
+    def update_last_used(self, model_id: str):
         """Update model last used timestamp"""
         try:
             (self.client.table('ml_models')
@@ -167,7 +167,7 @@ class SupabaseModelSync:
         except Exception as e:
             logger.error(f"Failed to update last used: {e}")
     
-    async def delete_model(self, model_id: str):
+    def delete_model(self, model_id: str):
         """Delete model from Supabase (soft delete)"""
         try:
             # Soft delete - just mark as inactive
@@ -176,7 +176,7 @@ class SupabaseModelSync:
         except Exception as e:
             logger.error(f"Failed to delete model: {e}")
     
-    async def get_model_by_symbol(self, symbol: str) -> Optional[Dict[str, Any]]:
+    def get_model_by_symbol(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Get the latest active model for a symbol"""
         try:
             response = (self.client.table('ml_models')
@@ -197,7 +197,7 @@ class SupabaseModelSync:
     
     # ==================== MT5 Connection Status ====================
     
-    async def update_mt5_connection_status(
+    def update_mt5_connection_status(
         self, 
         is_online: bool,
         mt5_login: str = "",
@@ -245,7 +245,7 @@ class SupabaseModelSync:
             logger.error(f"Failed to update MT5 status in Supabase: {e}")
             return False
     
-    async def send_heartbeat(self) -> bool:
+    def send_heartbeat(self) -> bool:
         """Send heartbeat to keep connection status alive in dashboard"""
         try:
             self.client.table('mt5_connections').update({
@@ -259,7 +259,7 @@ class SupabaseModelSync:
     
     # ==================== Trade Logging ====================
     
-    async def log_trade(
+    def log_trade(
         self,
         symbol: str,
         trade_type: str,  # 'buy' or 'sell'
@@ -301,7 +301,7 @@ class SupabaseModelSync:
             logger.error(f"Failed to log trade: {e}")
             return False
     
-    async def update_trade_close(
+    def update_trade_close(
         self,
         ticket: int,
         close_price: float,
