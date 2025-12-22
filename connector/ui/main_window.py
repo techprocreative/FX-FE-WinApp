@@ -160,68 +160,46 @@ class MainWindow(QMainWindow):
             3: ('settings', self._create_settings_page)
         }
         
-        if index in page_map:
-            page_key, create_func = page_map[index]
+        if index not in page_map:
+            return
             
-            # Lazy load
-            if not self._pages_loaded[page_key]:
-                # Pre-load dependencies
-                if page_key in ['dashboard', 'models']:
-                    self._ensure_ml_loaded()
-                if page_key == 'models':
-                    self._ensure_supabase_loaded()
-                    
-                page = create_func()
-                
-                # If stack is smaller than index, we might need to insert or add
-                # But QStackedWidget uses a flat list. We need to maintain order.
-                # Simplest strategy: check if widget exists at index, if not, add it.
-                # Actually, our sidebar sends 0, 1, 2, 3.
-                # We should append widgets in order or use insert.
-                
-                # Let's just use a dict to store page instances and set current widget?
-                # No, stack is better for transitions. 
-                # We'll just ensure stack has enough slots or insert at correct position.
-                
-                curr_count = self.content_stack.count()
-                if index >= curr_count:
-                    # Fill gaps with placeholders if needed (shouldn't happen if we go in order, 
-                    # but user might jump). 
-                    # Better: Just check if we already have the page type in the stack.
-                    # But index-based navigation assumes fixed positions.
-                    # Let's assume we initialize all 4 slots with placeholders first.
-                     pass 
-                     
-                self._pages_loaded[page_key] = True
+        page_key, create_func = page_map[index]
         
-        # For simplicity in this refactor, we'll re-create the stack or just ensure we have 4 widgets.
-        # Let's initialize placeholders in __init__?
-        # Or just handle it dynamically.
-        # Current logic: We'll assume the stack matches the sidebar indices.
-        # We need to ensure the stack is populated.
-        
+        # Ensure we have enough widgets in stack
         while self.content_stack.count() <= index:
-            self.content_stack.addWidget(QWidget()) # Placeholder
+            self.content_stack.addWidget(QWidget())  # Add placeholder
+        
+        # Lazy load page if not already loaded
+        if not self._pages_loaded[page_key]:
+            # Pre-load dependencies
+            if page_key in ['dashboard', 'models']:
+                self._ensure_ml_loaded()
+            if page_key == 'models':
+                self._ensure_supabase_loaded()
             
-        if create_func and not self._pages_loaded[page_key]:
-             page = create_func()
-             old = self.content_stack.widget(index)
-             self.content_stack.removeWidget(old)
-             self.content_stack.insertWidget(index, page)
-             self._pages_loaded[page_key] = True
-             
-             # If Dashboard, wire up signals
-             if page_key == 'dashboard':
-                 page.start_trading_requested.connect(self._start_auto_trading)
-                 page.stop_trading_requested.connect(self._stop_auto_trading)
-                 page.load_model_requested.connect(self._load_model_for_dashboard)
-             elif page_key == 'models':
-                 page.load_model_requested.connect(self._load_model_from_card)
-                 page.train_model_requested.connect(self._train_models_placeholder)
-             elif page_key == 'settings':
-                 page.logout_requested.connect(self._handle_logout)
-                 page.connect_mt5_requested.connect(self._connect_mt5)
-                 page.refresh_models_requested.connect(self._refresh_models_from_cloud)
+            # Create the page
+            page = create_func()
+            
+            # Replace placeholder with actual page
+            old_widget = self.content_stack.widget(index)
+            self.content_stack.removeWidget(old_widget)
+            old_widget.deleteLater()
+            self.content_stack.insertWidget(index, page)
+            
+            # Wire up signals
+            if page_key == 'dashboard':
+                page.start_trading_requested.connect(self._start_auto_trading)
+                page.stop_trading_requested.connect(self._stop_auto_trading)
+                page.load_model_requested.connect(self._load_model_for_dashboard)
+            elif page_key == 'models':
+                page.load_model_requested.connect(self._load_model_from_card)
+                page.train_model_requested.connect(self._train_models_placeholder)
+            elif page_key == 'settings':
+                page.logout_requested.connect(self._handle_logout)
+                page.connect_mt5_requested.connect(self._connect_mt5)
+                page.refresh_models_requested.connect(self._refresh_models_from_cloud)
+            
+            self._pages_loaded[page_key] = True
         
         self.content_stack.setCurrentIndex(index)
         self.sidebar.set_active_index(index)
