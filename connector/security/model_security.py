@@ -35,9 +35,17 @@ class ModelSecurity:
     """
     Handles ML model encryption and hardware binding.
     Models are encrypted with AES-256 using a key derived from HWID.
+    Shared models use a master key instead for universal access.
     """
     
     SALT = b"NexusTrade_ML_Model_Salt_v1"
+    
+    # Marker for shared models (no HWID binding)
+    SHARED_HWID_MARKER = "SHARED_NexusTrade_v1"
+    
+    # Master key for shared models (base64-encoded 32-byte key)
+    # This allows default models to be used on any machine
+    _MASTER_KEY = b"TmV4dXNUcmFkZV9NYXN0ZXJLZXlfdjFfU2VjdXJl"  # Fixed key
     
     def __init__(self, models_dir: Optional[Path] = None):
         self.models_dir = models_dir or Path.home() / ".nexustrade" / "models"
@@ -112,20 +120,23 @@ class ModelSecurity:
         self, 
         model: Any, 
         model_id: str,
-        metadata: Optional[dict] = None
+        metadata: Optional[dict] = None,
+        is_shared: bool = False
     ) -> SecuredModel:
         """
-        Encrypt a trained ML model with HWID-bound encryption.
+        Encrypt a trained ML model.
         
         Args:
             model: The trained scikit-learn or similar model
             model_id: Unique identifier for the model
             metadata: Optional metadata (accuracy, symbol, etc.)
+            is_shared: If True, uses master key (no HWID binding)
         
         Returns:
             SecuredModel container with encrypted data
         """
         metadata = metadata or {}
+        metadata['is_shared'] = is_shared
         
         # Serialize model
         model_bytes = pickle.dumps(model)
@@ -134,12 +145,18 @@ class ModelSecurity:
         model_hash = hashlib.sha256(model_bytes).hexdigest()
         
         # Encrypt with Fernet (AES-128-CBC with HMAC)
-        key = self._derive_key()
+        if is_shared:
+            # Use master key for shared models
+            key = self._MASTER_KEY
+            hwid_hash = self.SHARED_HWID_MARKER
+            logger.info(f"Encrypting shared model {model_id} with master key")
+        else:
+            # User model - bind to HWID
+            key = self._derive_key()
+            hwid_hash = hashlib.sha256(self.hwid.encode()).hexdigest()
+        
         fernet = Fernet(key)
         encrypted_data = fernet.encrypt(model_bytes)
-        
-        # HWID hash for verification
-        hwid_hash = hashlib.sha256(self.hwid.encode()).hexdigest()
         
         secured = SecuredModel(
             model_id=model_id,
@@ -149,13 +166,13 @@ class ModelSecurity:
             metadata=metadata
         )
         
-        logger.info(f"Model {model_id} encrypted successfully")
+        logger.info(f"Model {model_id} encrypted successfully (shared={is_shared})")
         return secured
     
     def decrypt_model(self, secured: SecuredModel) -> Optional[Any]:
         """
         Decrypt and load a secured model.
-        Fails if HWID doesn't match.
+        Shared models bypass HWID check.
         
         Args:
             secured: SecuredModel container
@@ -163,15 +180,22 @@ class ModelSecurity:
         Returns:
             The decrypted model, or None if verification fails
         """
-        # Verify HWID
-        current_hwid_hash = hashlib.sha256(self.hwid.encode()).hexdigest()
-        if current_hwid_hash != secured.hwid_hash:
-            logger.error(f"HWID mismatch for model {secured.model_id}")
-            return None
+        # Check if shared model
+        is_shared = secured.hwid_hash == self.SHARED_HWID_MARKER
+        
+        if is_shared:
+            logger.info(f"Loading shared model {secured.model_id}")
+            key = self._MASTER_KEY
+        else:
+            # Verify HWID for user models
+            current_hwid_hash = hashlib.sha256(self.hwid.encode()).hexdigest()
+            if current_hwid_hash != secured.hwid_hash:
+                logger.error(f"HWID mismatch for model {secured.model_id}")
+                return None
+            key = self._derive_key()
         
         try:
             # Decrypt
-            key = self._derive_key()
             fernet = Fernet(key)
             model_bytes = fernet.decrypt(secured.encrypted_data)
             
