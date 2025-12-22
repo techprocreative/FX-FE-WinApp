@@ -254,7 +254,12 @@ class MainWindow(QMainWindow):
     def _ensure_supabase_loaded(self):
         if not self.supabase_sync:
             from core.supabase_sync import SupabaseModelSync
-            self.supabase_sync = SupabaseModelSync(self._supabase_config)
+            self.supabase_sync = SupabaseModelSync(
+                supabase_url=self._supabase_config['url'],
+                supabase_key=self._supabase_config['anon_key'],
+                user_id=self._supabase_config['user_id'],
+                access_token=self._supabase_config.get('access_token')
+            )
 
     def _check_mt5_connection(self):
         if self.mt5_client.is_connected:
