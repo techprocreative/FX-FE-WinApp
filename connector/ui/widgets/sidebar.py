@@ -15,7 +15,7 @@ class NavSidebar(QWidget):
     def __init__(self):
         super().__init__()
         self.setFixedWidth(240)
-        self.setStyleSheet(f"background: {DT.GLASS_DARK}; border-right: 1px solid {DT.BORDER_default};")
+        self.setStyleSheet(f"background: {DT.GLASS_DARK}; border-right: 1px solid {DT.BORDER_DEFAULT};")
         
         self.buttons = []
         self._setup_ui()

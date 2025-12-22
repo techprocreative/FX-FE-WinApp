@@ -145,7 +145,7 @@ class SettingsPage(QWidget):
                 font-family: {DT.FONT_FAMILY};
             }}
             QPushButton:hover {{
-                background: {DT.GLASS_HIGH};
+                background: {DT.SUCCESS_DARK};
             }}
         """)
         self.connect_btn.clicked.connect(self._on_connect_clicked)

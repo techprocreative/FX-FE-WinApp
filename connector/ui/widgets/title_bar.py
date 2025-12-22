@@ -17,7 +17,7 @@ class ModernTitleBar(QWidget):
     def __init__(self, title: str = "NexusTrade"):
         super().__init__()
         self.setFixedHeight(40)
-        self.setStyleSheet(f"background: {DT.GLASS_DARK}; border-bottom: 1px solid {DT.BORDER_default};")
+        self.setStyleSheet(f"background: {DT.GLASS_DARK}; border-bottom: 1px solid {DT.BORDER_DEFAULT};")
         self._setup_ui(title)
         
         # Dragging state
