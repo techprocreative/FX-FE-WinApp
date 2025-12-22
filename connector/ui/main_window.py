@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
             self.supabase_sync = SupabaseModelSync(self._supabase_config)
 
     def _check_mt5_connection(self):
-        if self.mt5_client.connect():
+        if self.mt5_client.is_connected:
              # Notify settings page if loaded
              if self._pages_loaded['settings']:
                  settings_page = self.content_stack.widget(3)
