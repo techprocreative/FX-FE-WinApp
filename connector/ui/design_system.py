@@ -419,3 +419,44 @@ class StyleSheets:
             border-radius: {DesignTokens.RADIUS_2XL}px;
             padding: {DesignTokens.SPACE_XL}px;
         """
+
+    @staticmethod
+    def sidebar_button(active: bool = False) -> str:
+        bg = DesignTokens.PRIMARY if active else "transparent"
+        text = "white" if active else DesignTokens.TEXT_SECONDARY
+        hover_bg = DesignTokens.PRIMARY_HOVER if active else DesignTokens.GLASS_LOW
+        
+        return f"""
+            QPushButton {{
+                background: {bg};
+                color: {text};
+                border: none;
+                border-radius: {DesignTokens.RADIUS_MD}px;
+                padding: {DesignTokens.SPACE_MD}px;
+                font-family: {DesignTokens.FONT_FAMILY};
+                font-weight: {DesignTokens.WEIGHT_BOLD};
+                text-align: left;
+            }}
+            QPushButton:hover {{
+                background: {hover_bg};
+                color: white;
+            }}
+        """
+
+    @staticmethod
+    def title_bar_button(is_close: bool = False) -> str:
+        hover_bg = DesignTokens.DANGER if is_close else DesignTokens.GLASS_LOW
+        return f"""
+            QPushButton {{
+                background: transparent;
+                border: none;
+                border-radius: 0px;
+                color: {DesignTokens.TEXT_SECONDARY};
+                font-family: {DesignTokens.FONT_FAMILY};
+                font-size: 14px;
+            }}
+            QPushButton:hover {{
+                background: {hover_bg};
+                color: white;
+            }}
+        """
