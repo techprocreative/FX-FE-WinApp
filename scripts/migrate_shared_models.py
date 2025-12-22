@@ -10,23 +10,34 @@ import asyncio
 from pathlib import Path
 from datetime import datetime
 
-# Add connector to path
-sys.path.insert(0, str(Path(__file__).parent / "connector"))
+# Add connector to path - handle running from different directories
+script_dir = Path(__file__).parent.absolute()
+project_root = script_dir.parent
+connector_dir = project_root / "connector"
+sys.path.insert(0, str(connector_dir))
 
 from security.model_security import ModelSecurity
 from core.supabase_sync import SupabaseModelSync
 from core.config import Config
 
-# Models to re-encrypt
+# Models to re-encrypt (found in models/ directory)
 MODELS_TO_MIGRATE = [
     {
         "raw_pkl_path": "models/btcusd/crypto-optimized/model_crypto_xgboost_20251213_104319.pkl",
         "symbol": "BTCUSD",
         "name": "btcusd_hybrid",
-        "accuracy": 0.65,  # Update with actual
+        "accuracy": 0.65,
         "model_type": "gru_xgboost_hybrid"
     },
-    # Add XAUUSD if raw pkl exists
+    # Note: No XAUUSD model found in models/ directory yet
+    # If you have one, add it here:
+    # {
+    #     "raw_pkl_path": "models/xauusd/...",
+    #     "symbol": "XAUUSD", 
+    #     "name": "xauusd_hybrid",
+    #     "accuracy": 0.65,
+    #     "model_type": "gru_xgboost_hybrid"
+    # },
 ]
 
 
@@ -63,20 +74,15 @@ def re_encrypt_as_shared(model_path: Path, symbol: str, name: str, accuracy: flo
     return file_path, model_id, metadata
 
 
-async def upload_to_supabase(local_path: Path, model_id: str, metadata: dict):
+async def upload_to_supabase(local_path: Path, model_id: str, metadata: dict, admin_user_id: str):
     """Upload the model to Supabase storage"""
     config = Config()
-    
-    # Get admin user ID (yours)
-    # NOTE: This should be your user ID or a service account
-    admin_user_id = input("Enter admin user_id (from Supabase auth): ").strip()
-    access_token = input("Enter Supabase access_token: ").strip()
     
     sync = SupabaseModelSync(
         supabase_url=config.supabase.url,
         supabase_key=config.supabase.anon_key,
         user_id=admin_user_id,
-        access_token=access_token
+        access_token=None  # Will use anon key for upload
     )
     
     upload_metadata = {
@@ -102,7 +108,16 @@ async def main():
     print("RE-ENCRYPT MODELS AS SHARED")
     print("="*60)
     
-    base_dir = Path(__file__).parent
+    # Get admin user ID from environment or use default
+    admin_user_id = os.environ.get("ADMIN_USER_ID", "")
+    if not admin_user_id:
+        admin_user_id = input("Enter admin user_id (from Supabase auth): ").strip()
+    
+    if not admin_user_id:
+        print("Error: No admin_user_id provided")
+        return
+    
+    base_dir = Path(__file__).parent.parent
     
     for model_info in MODELS_TO_MIGRATE:
         raw_path = base_dir / model_info["raw_pkl_path"]
@@ -120,7 +135,7 @@ async def main():
         )
         
         # Upload to Supabase
-        await upload_to_supabase(local_path, model_id, metadata)
+        await upload_to_supabase(local_path, model_id, metadata, admin_user_id)
     
     print("\n✓ Migration complete!")
 

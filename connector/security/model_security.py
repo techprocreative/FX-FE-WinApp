@@ -43,9 +43,9 @@ class ModelSecurity:
     # Marker for shared models (no HWID binding)
     SHARED_HWID_MARKER = "SHARED_NexusTrade_v1"
     
-    # Master key for shared models (base64-encoded 32-byte key)
+    # Master key for shared models (valid Fernet key)
     # This allows default models to be used on any machine
-    _MASTER_KEY = b"TmV4dXNUcmFkZV9NYXN0ZXJLZXlfdjFfU2VjdXJl"  # Fixed key
+    _MASTER_KEY = b"3Nd9JfASGG_4CiWviN62Sx2Hl9tiI19cuuTeSNtpZMI="
     
     def __init__(self, models_dir: Optional[Path] = None):
         self.models_dir = models_dir or Path.home() / ".nexustrade" / "models"

@@ -99,12 +99,16 @@ class SupabaseModelSync:
             # Storage path: {user_id}/{model_id}.nexmodel (standardized extension)
             storage_path = f"{self.user_id}/{model_id}.nexmodel"
             
-            # Upload file to Storage
+            # Upload file to Storage with correct content-type
             logger.info(f"Uploading model to {storage_path}")
             with open(model_path, 'rb') as f:
                 file_data = f.read()
+                file_options = {
+                    'content-type': 'application/octet-stream',
+                    'upsert': 'true'
+                }
                 (self.client.storage.from_(self.bucket_name)
-                    .upload(storage_path, file_data, {'upsert': 'true'}))
+                    .upload(storage_path, file_data, file_options))
             
             # Prepare metadata
             model_size = model_path.stat().st_size
