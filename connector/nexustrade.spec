@@ -128,7 +128,7 @@ a = Analysis(
             'languages': [],
         },
     },
-    runtime_hooks=[],
+    runtime_hooks=['hooks/rthook-scipy.py'],
     excludes=[
         # Heavy unused libraries - Complete TensorFlow/Keras exclusion
         'tensorflow',
