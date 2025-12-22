@@ -171,7 +171,7 @@ class SupabaseModelSync:
         """Delete model from Supabase (soft delete)"""
         try:
             # Soft delete - just mark as inactive
-            await self.update_model_status(model_id, False)
+            self.update_model_status(model_id, False)
             logger.info(f"Deleted model {model_id}")
         except Exception as e:
             logger.error(f"Failed to delete model: {e}")
