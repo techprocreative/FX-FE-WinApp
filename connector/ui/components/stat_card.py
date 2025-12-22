@@ -58,11 +58,12 @@ class StatCard(QFrame):
 
         icon_label = QLabel(icon)
         icon_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XL))
+        icon_label.setStyleSheet("background: transparent;")
         header_layout.addWidget(icon_label)
 
         title_label = QLabel(title)
         title_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XS, DT.WEIGHT_SEMIBOLD))
-        title_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY};")
+        title_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; background: transparent;")
         header_layout.addWidget(title_label)
         header_layout.addStretch()
 
@@ -73,7 +74,7 @@ class StatCard(QFrame):
 
         self.value_label = QLabel(value)
         self.value_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_4XL, DT.WEIGHT_BOLD))
-        self.value_label.setStyleSheet(f"color: {DT.TEXT_PRIMARY};")
+        self.value_label.setStyleSheet(f"color: {DT.TEXT_PRIMARY}; background: transparent;")
         value_layout.addWidget(self.value_label)
 
         if trend:

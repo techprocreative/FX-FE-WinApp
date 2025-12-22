@@ -69,12 +69,12 @@ class SignalCard(QFrame):
         # Model info
         self.model_name_label = QLabel("No model loaded")
         self.model_name_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_SM))
-        self.model_name_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY};")
+        self.model_name_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; background: transparent;")
         layout.addWidget(self.model_name_label)
 
         self.model_accuracy_label = QLabel("")
         self.model_accuracy_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XS))
-        self.model_accuracy_label.setStyleSheet(f"color: {DT.TEXT_MUTED};")
+        self.model_accuracy_label.setStyleSheet(f"color: {DT.TEXT_MUTED}; background: transparent;")
         layout.addWidget(self.model_accuracy_label)
 
         # Signal indicator (large)
@@ -93,21 +93,21 @@ class SignalCard(QFrame):
         self.confidence_label = QLabel("")
         self.confidence_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_SM, DT.WEIGHT_SEMIBOLD))
         self.confidence_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.confidence_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY};")
+        self.confidence_label.setStyleSheet(f"color: {DT.TEXT_SECONDARY}; background: transparent;")
         layout.addWidget(self.confidence_label)
 
         # Last signal time
         self.last_signal_label = QLabel("")
         self.last_signal_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XS))
         self.last_signal_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.last_signal_label.setStyleSheet(f"color: {DT.TEXT_MUTED};")
+        self.last_signal_label.setStyleSheet(f"color: {DT.TEXT_MUTED}; background: transparent;")
         layout.addWidget(self.last_signal_label)
 
         # Statistics
         self.stats_label = QLabel("")
         self.stats_label.setFont(QFont(DT.FONT_FAMILY.strip("'"), DT.FONT_XS))
         self.stats_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.stats_label.setStyleSheet(f"color: {DT.TEXT_MUTED};")
+        self.stats_label.setStyleSheet(f"color: {DT.TEXT_MUTED}; background: transparent;")
         layout.addWidget(self.stats_label)
 
         # Load model button (initially visible)
