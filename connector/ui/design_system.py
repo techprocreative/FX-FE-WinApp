@@ -149,6 +149,7 @@ class DesignTokens:
     PRIMARY_DARK = "#0891b2"
     PRIMARY_DARKER = "#0e7490"
     PRIMARY_LIGHT = "#22d3ee"
+    PRIMARY_HOVER = "#0ea5e9"       # Hover state for primary
 
     SECONDARY = "#14b8a6"        # Teal
     SECONDARY_DARK = "#0d9488"
@@ -179,6 +180,7 @@ class DesignTokens:
     GLASS_DARK = "rgba(15, 23, 42, 0.8)"
     GLASS_MEDIUM = "rgba(30, 41, 59, 0.6)"
     GLASS_LIGHT = "rgba(51, 65, 85, 0.4)"
+    GLASS_LOW = "rgba(51, 65, 85, 0.2)"    # Very subtle glass
 
     # Text Colors
     TEXT_PRIMARY = "#f8fafc"     # Slate 50
