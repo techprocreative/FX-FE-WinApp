@@ -296,17 +296,24 @@ class MainWindow(QMainWindow):
             dashboard.set_trading_state(False)
 
     def _load_model_for_dashboard(self, symbol: str):
-        # We need to find the latest model for this symbol?
-        # Or duplicate logic from old `_load_model`.
+        """Load model for a symbol from Dashboard signal cards"""
         self._ensure_ml_loaded()
-        models = self.model_security.list_models()
-        symbol_models = [m for m in models if symbol.lower() in m.lower()]
+        
+        # Get models with metadata to properly match by symbol
+        models = self.model_security.list_models_with_metadata()
+        
+        # Find models matching the requested symbol (case insensitive)
+        symbol_upper = symbol.upper()
+        symbol_models = [m for m in models if m.get('symbol', '').upper() == symbol_upper]
         
         if not symbol_models:
-            QMessageBox.warning(self, "No Model", f"No model found for {symbol}. Train one first.")
+            QMessageBox.warning(self, "No Model", f"No model found for {symbol}. Sync from cloud or train one.")
             return
 
-        model_id = sorted(symbol_models)[-1]
+        # Pick the most recent one (by created_at or just first)
+        model_info = symbol_models[0]  # Already sorted by created_at desc from list_models_with_metadata
+        model_id = model_info['model_id']
+        
         self._load_model_from_card(model_id)
 
     def _load_model_from_card(self, model_id: str):
