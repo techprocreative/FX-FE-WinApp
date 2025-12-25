@@ -38,6 +38,8 @@ logs/
 # Testing
 coverage/
 .pytest_cache/
+.hypothesis/
+*/.hypothesis/
 
 # Misc
 *.bak
@@ -46,3 +48,5 @@ coverage/
 # Large data folders
 ohlcv/
 models/
+# Spec drafts and work-in-progress
+.kiro/specs/mvp-live-trading-connector/
