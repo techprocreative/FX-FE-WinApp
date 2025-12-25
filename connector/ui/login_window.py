@@ -1,6 +1,8 @@
 """
 NexusTrade Login Window
 Login screen for Windows connector using Supabase authentication
+
+Requirements: 6.1, 6.2, 6.3
 """
 
 from PyQt6.QtWidgets import (
@@ -13,6 +15,7 @@ from supabase import create_client, Client
 from loguru import logger
 
 from ui.design_system import DesignTokens as DT, StyleSheets
+from core.errors import ErrorCode, get_error_info, ErrorInfo
 
 
 class LoginWindow(QWidget):
@@ -232,23 +235,54 @@ class LoginWindow(QWidget):
                 self.login_successful.emit(user_data)
                 self.close()
             else:
-                self._show_error("Login failed. Please check your credentials.")
+                error_info = get_error_info(ErrorCode.AUTH_UNKNOWN)
+                self._show_error_with_guidance(error_info)
 
         except Exception as e:
             logger.error(f"Login error: {e}")
-            error_msg = str(e)
-            if "Invalid login credentials" in error_msg:
-                self._show_error("Invalid email or password")
-            elif "Email not confirmed" in error_msg:
-                self._show_error("Please confirm your email first")
-            else:
-                self._show_error("Login failed. Please try again.")
+            error_code = self._classify_auth_error(str(e))
+            error_info = get_error_info(error_code)
+            self._show_error_with_guidance(error_info)
 
         finally:
             self.login_btn.setEnabled(True)
             self.login_btn.setText("Login")
 
+    def _classify_auth_error(self, error_msg: str) -> str:
+        """
+        Classify authentication error into our error code system.
+        
+        Args:
+            error_msg: The error message from Supabase
+            
+        Returns:
+            Our internal error code
+        """
+        error_lower = error_msg.lower()
+        
+        if "invalid login credentials" in error_lower:
+            return ErrorCode.AUTH_INVALID_CREDENTIALS
+        elif "email not confirmed" in error_lower:
+            return ErrorCode.AUTH_EMAIL_NOT_CONFIRMED
+        elif "invalid" in error_lower and ("email" in error_lower or "password" in error_lower):
+            return ErrorCode.AUTH_INVALID_CREDENTIALS
+        elif "expired" in error_lower or "token" in error_lower:
+            return ErrorCode.AUTH_SESSION_EXPIRED
+        elif "network" in error_lower or "connection" in error_lower or "timeout" in error_lower:
+            return ErrorCode.AUTH_NETWORK_ERROR
+        elif "fetch" in error_lower or "request" in error_lower:
+            return ErrorCode.AUTH_NETWORK_ERROR
+        
+        return ErrorCode.AUTH_UNKNOWN
+
     def _show_error(self, message: str):
-        """Show error message"""
+        """Show simple error message"""
+        self.error_label.setText(message)
+        self.error_label.show()
+
+    def _show_error_with_guidance(self, error_info: ErrorInfo):
+        """Show error message with guidance from error info"""
+        # Format message with guidance
+        message = f"{error_info.user_message}\n\n💡 {error_info.guidance}"
         self.error_label.setText(message)
         self.error_label.show()

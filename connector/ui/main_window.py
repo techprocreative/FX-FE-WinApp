@@ -15,6 +15,7 @@ from PyQt6.QtGui import QColor, QMouseEvent
 
 from core.config import Config
 from core.mt5_client import MT5Client
+from core.config_manager import ConfigManager, TradingConfigData
 from api.server import set_mt5_client
 
 from ui.design_system import DesignTokens as DT
@@ -73,6 +74,7 @@ class MainWindow(QMainWindow):
         self.config = config
         self.user_data = user_data
         self.mt5_client = MT5Client()
+        self.config_manager = ConfigManager()
         
         # Initial Window Setup
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
@@ -216,7 +218,7 @@ class MainWindow(QMainWindow):
         return LogsPage()
 
     def _create_settings_page(self) -> QWidget:
-        return SettingsPage(self.user_data)
+        return SettingsPage(self.user_data, self.config_manager, self.mt5_client)
 
     # --- Logic & Signals ---
 
@@ -245,23 +247,33 @@ class MainWindow(QMainWindow):
              if self._pages_loaded['settings']:
                  settings_page = self.content_stack.widget(3)
                  if isinstance(settings_page, SettingsPage):
+                     settings_page.set_mt5_client(self.mt5_client)
                      settings_page.set_mt5_status(True)
              
-             # Notify Dashboard
-             # TODO: Add connection status to Dashboard
+             # Set MT5 client for API server
+             set_mt5_client(self.mt5_client)
         else:
             logger.warning("MT5 not connected on startup")
 
     def _connect_mt5(self, info: dict):
-        # Update config only if provided? 
-        # For security, we might not save password to plain text config easily.
-        # Just try to connect.
-        if self.mt5_client.connect(login=int(info['login'] or 0), password=info['password'], server=info['server']):
+        # Try to connect to MT5
+        login = int(info['login'] or 0)
+        server = info['server']
+        
+        if self.mt5_client.login(login=login, password=info['password'], server=server):
             QMessageBox.information(self, "Success", "Connected to MT5")
             settings_page = self.content_stack.widget(3)
-            settings_page.set_mt5_status(True)
+            if isinstance(settings_page, SettingsPage):
+                settings_page.set_mt5_status(True)
+                settings_page.set_mt5_client(self.mt5_client)
+                
+                # Save MT5 config (excluding password) for future sessions
+                settings_page.save_mt5_config(login, server)
+            
+            # Set MT5 client for API server
+            set_mt5_client(self.mt5_client)
         else:
-             QMessageBox.warning(self, "Error", "Failed to connect to MT5")
+            QMessageBox.warning(self, "Error", "Failed to connect to MT5")
 
     def _start_auto_trading(self, interval: int):
         self._ensure_ml_loaded()
@@ -333,10 +345,39 @@ class MainWindow(QMainWindow):
              
         # Lazy import config
         from trading.auto_trader import TradingConfig
-        config = TradingConfig(symbol=symbol, timeframe="M15", volume=0.01)
+        from core.config_manager import TradingConfigData
+        
+        # Load saved trading config for this symbol, or use defaults
+        saved_config = self.config_manager.get_trading_config(symbol)
+        
+        config = TradingConfig(
+            symbol=symbol,
+            timeframe=saved_config.timeframe,
+            volume=saved_config.volume,
+            risk_percent=saved_config.risk_percent,
+            max_positions=saved_config.max_positions,
+            confidence_threshold=saved_config.confidence_threshold,
+            sl_pips=saved_config.sl_pips,
+            tp_pips=saved_config.tp_pips,
+            magic_number=saved_config.magic_number
+        )
         
         if self.auto_trader.load_model(model_id, symbol, config):
             QMessageBox.information(self, "Success", f"Loaded {model_info.get('name')} for {symbol}")
+            
+            # Save trading config for this symbol
+            trading_config_data = TradingConfigData(
+                symbol=symbol,
+                timeframe=config.timeframe,
+                volume=config.volume,
+                risk_percent=config.risk_percent,
+                max_positions=config.max_positions,
+                confidence_threshold=config.confidence_threshold,
+                sl_pips=config.sl_pips,
+                tp_pips=config.tp_pips,
+                magic_number=config.magic_number
+            )
+            self.config_manager.set_trading_config(symbol, trading_config_data)
             
             # Update Dashboard Status
             if self._pages_loaded['dashboard']:
@@ -360,6 +401,13 @@ class MainWindow(QMainWindow):
                     downloaded_count += 1
             
             QMessageBox.information(self, "Sync", f"Synced {len(models)} models, downloaded {downloaded_count}")
+            
+            # Update sync status on settings page
+            if self._pages_loaded['settings']:
+                settings_page = self.content_stack.widget(3)
+                if isinstance(settings_page, SettingsPage):
+                    sync_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    settings_page.update_sync_status(f"Last sync: {sync_time}")
             
             if self._pages_loaded['models']:
                 self.content_stack.widget(1).refresh()

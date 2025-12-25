@@ -35,6 +35,7 @@ logger.info("=" * 80)
 # Import modules
 try:
     from core.config import Config
+    from core.config_manager import ConfigManager
     from ui.login_window import LoginWindow
     from ui.main_window import MainWindow
     from api.server import start_api_server
@@ -126,6 +127,22 @@ async def main():
                 str(e)
             )
             return 1
+
+        # Load saved user configuration (MT5 credentials, trading params, etc.)
+        logger.info("Loading saved user configuration...")
+        try:
+            config_manager = ConfigManager()
+            saved_config = config_manager.load()
+            logger.info(f"✓ User configuration loaded from {config_manager.config_path}")
+            if saved_config.mt5.login:
+                logger.info(f"  - MT5 login: {saved_config.mt5.login}")
+            if saved_config.mt5.server:
+                logger.info(f"  - MT5 server: {saved_config.mt5.server}")
+            if saved_config.trading_configs:
+                logger.info(f"  - Trading configs for: {list(saved_config.trading_configs.keys())}")
+        except Exception as e:
+            logger.warning(f"Could not load saved configuration: {e}")
+            # Continue anyway - saved config is not critical
 
         # Show login window FIRST for fast startup
         logger.info("Creating login window...")

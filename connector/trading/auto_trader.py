@@ -14,6 +14,7 @@ from loguru import logger
 
 from core.mt5_client import MT5Client
 from security.model_security import ModelSecurity, SecuredModel
+from trading.risk_manager import RiskManager
 
 
 class Signal(Enum):
@@ -74,10 +75,12 @@ class AutoTrader:
     def __init__(
         self, 
         mt5_client: MT5Client, 
-        model_security: ModelSecurity
+        model_security: ModelSecurity,
+        risk_manager: Optional[RiskManager] = None
     ):
         self.mt5 = mt5_client
         self.security = model_security
+        self.risk_manager = risk_manager or RiskManager()
         
         # Active models: symbol -> ModelInfo
         self.models: Dict[str, ModelInfo] = {}
@@ -347,34 +350,42 @@ class AutoTrader:
                 self.mt5.close_position(pos.ticket)
                 logger.info(f"Closed conflicting position {pos.ticket}")
         
-        # Calculate volume based on risk
+        # Get pip size using RiskManager
+        pip_size = self.risk_manager.get_pip_size(symbol)
+        
+        # Calculate volume based on risk using RiskManager
         account = self.mt5.get_account_info()
         if account:
-            risk_amount = account.balance * (config.risk_percent / 100)
-            # Simplified volume calculation
-            volume = min(config.volume, risk_amount / 1000)
-            volume = max(0.01, round(volume, 2))
+            # Estimate pip value (simplified: pip_size * volume * 100000 for forex)
+            # For crypto/metals, pip_value varies by instrument
+            pip_value = pip_size * 100000  # Standard lot pip value estimate
+            if 'BTC' in symbol.upper():
+                pip_value = 1.0  # BTC pip value per lot
+            elif 'XAU' in symbol.upper() or 'GOLD' in symbol.upper():
+                pip_value = 10.0  # Gold pip value per lot
+            
+            volume = self.risk_manager.calculate_lot_size(
+                balance=account.balance,
+                risk_percent=config.risk_percent,
+                sl_pips=config.sl_pips,
+                pip_value=pip_value
+            )
         else:
             volume = config.volume
         
-        # Calculate SL/TP
+        # Get current price for SL/TP calculation
         tick = self.mt5.get_ohlc(symbol, "M1", 1)
         if tick:
             current_price = tick[0]['close']
             
-            # Get pip value (simplified)
-            pip_size = 0.01 if 'JPY' in symbol else 0.0001
-            if 'XAU' in symbol or 'GOLD' in symbol:
-                pip_size = 0.1
-            if 'BTC' in symbol:
-                pip_size = 1.0
-            
-            if signal == Signal.BUY:
-                sl = current_price - (config.sl_pips * pip_size)
-                tp = current_price + (config.tp_pips * pip_size)
-            else:
-                sl = current_price + (config.sl_pips * pip_size)
-                tp = current_price - (config.tp_pips * pip_size)
+            # Calculate SL/TP using RiskManager
+            sl, tp = self.risk_manager.calculate_sl_tp(
+                entry_price=current_price,
+                order_type=signal.value,
+                sl_pips=config.sl_pips,
+                tp_pips=config.tp_pips,
+                pip_size=pip_size
+            )
         else:
             sl = None
             tp = None
@@ -477,8 +488,8 @@ class AutoTrader:
                 continue
 
             try:
-                # Check MT5 connection
-                if not self.mt5.is_connected:
+                # Check MT5 connection (triggers auto-reconnect if needed)
+                if not self.mt5.check_connection():
                     logger.warning("MT5 not connected, skipping iteration")
                     await asyncio.sleep(interval_seconds)
                     continue
